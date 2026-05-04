@@ -13,6 +13,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	db "github.com/Gtaylor0213/rolebook/backend/db/generated"
+	"github.com/Gtaylor0213/rolebook/backend/internal/auth"
 	"github.com/Gtaylor0213/rolebook/backend/internal/handlers"
 )
 
@@ -65,10 +66,14 @@ func main() {
 
 	queries := db.New(pool)
 	authHandler := &handlers.AuthHandler{Queries: queries}
+	requireAuth := auth.RequireAuth(queries)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", healthHandler)
 	mux.HandleFunc("POST /api/auth/signup", authHandler.Signup)
+	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
+	mux.HandleFunc("POST /api/auth/logout", authHandler.Logout)
+	mux.HandleFunc("GET /api/auth/me", requireAuth(authHandler.Me))
 
 	addr := ":8080"
 	log.Printf("rolebook-server listening on %s", addr)

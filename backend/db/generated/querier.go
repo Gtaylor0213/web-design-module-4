@@ -10,12 +10,15 @@ import (
 )
 
 type Querier interface {
+	CreateRolebook(ctx context.Context, arg CreateRolebookParams) (sql.Result, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (sql.Result, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error)
 	DeleteSessionByToken(ctx context.Context, token string) error
+	GetRolebookByOwner(ctx context.Context, ownerID int32) (Rolebook, error)
 	GetSessionByToken(ctx context.Context, token string) (Session, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
+	UpdateRolebookByOwner(ctx context.Context, arg UpdateRolebookByOwnerParams) (sql.Result, error)
 }
 
 var _ Querier = (*Queries)(nil)

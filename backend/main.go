@@ -66,6 +66,7 @@ func main() {
 
 	queries := db.New(pool)
 	authHandler := &handlers.AuthHandler{Queries: queries}
+	rolebookHandler := &handlers.RolebookHandler{Queries: queries}
 	requireAuth := auth.RequireAuth(queries)
 
 	mux := http.NewServeMux()
@@ -74,6 +75,9 @@ func main() {
 	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
 	mux.HandleFunc("POST /api/auth/logout", authHandler.Logout)
 	mux.HandleFunc("GET /api/auth/me", requireAuth(authHandler.Me))
+	mux.HandleFunc("GET /api/rolebook", requireAuth(rolebookHandler.Get))
+	mux.HandleFunc("POST /api/rolebook", requireAuth(rolebookHandler.Create))
+	mux.HandleFunc("PUT /api/rolebook", requireAuth(rolebookHandler.Update))
 
 	addr := ":8080"
 	log.Printf("rolebook-server listening on %s", addr)

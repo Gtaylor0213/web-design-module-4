@@ -1,9 +1,15 @@
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { BookMarked, LogOut, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook } from '@/hooks/useRolebook';
+
+import { ContactsSection } from '@/pages/sections/ContactsSection';
+import { ProjectsSection } from '@/pages/sections/ProjectsSection';
+import { SoftwareSection } from '@/pages/sections/SoftwareSection';
+import { RecurringSection } from '@/pages/sections/RecurringSection';
+import { NotesSection } from '@/pages/sections/NotesSection';
 
 const SECTIONS = [
   { slug: 'contacts', label: 'Contacts' },
@@ -13,22 +19,34 @@ const SECTIONS = [
   { slug: 'notes', label: 'Notes' },
 ] as const;
 
+const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
+  contacts: ContactsSection,
+  projects: ProjectsSection,
+  software: SoftwareSection,
+  recurring: RecurringSection,
+  notes: NotesSection,
+};
+
 export function Dashboard() {
   const { pathname } = useLocation();
+  const params = useParams<{ section?: string }>();
   const me = useMe();
   const rolebook = useRolebook();
   const logout = useLogout();
 
-  // /dashboard with no section -> redirect to the first one.
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
     return <Navigate to="/dashboard/contacts" replace />;
   }
 
-  const activeSlug = pathname.split('/')[2] ?? 'contacts';
+  const activeSlug = params.section ?? 'contacts';
+  const SectionComponent = SECTION_COMPONENTS[activeSlug];
+
+  if (!SectionComponent) {
+    return <Navigate to="/dashboard/contacts" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Header */}
       <header className="bg-white border-b border-neutral-200">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -66,7 +84,6 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Tab nav */}
         <div className="max-w-5xl mx-auto px-6">
           <nav className="flex gap-1 -mb-px overflow-x-auto" aria-label="Sections">
             {SECTIONS.map((s) => {
@@ -91,14 +108,7 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        <div className="rounded-md border border-dashed border-neutral-300 bg-white p-10 text-center">
-          <h2 className="text-lg font-medium text-neutral-900 mb-1 capitalize">
-            {SECTIONS.find((s) => s.slug === activeSlug)?.label ?? activeSlug}
-          </h2>
-          <p className="text-sm text-neutral-500">
-            Section UI coming in the next phase.
-          </p>
-        </div>
+        <SectionComponent />
       </main>
     </div>
   );

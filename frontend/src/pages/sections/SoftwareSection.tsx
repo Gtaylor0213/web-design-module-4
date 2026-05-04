@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/form';
 
 import { EntryCard } from '@/components/EntryCard';
+import { SearchInput } from '@/components/SearchInput';
 import {
   SectionEmpty,
   SectionError,
@@ -39,6 +40,7 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { searchFilter } from '@/lib/filter';
 import type { Software } from '@/lib/types';
 
 const schema = z.object({
@@ -60,6 +62,16 @@ export function SoftwareSection() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Software | null>(null);
   const [deleting, setDeleting] = useState<Software | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = list.data
+    ? searchFilter(list.data, query, [
+        (s) => s.name,
+        (s) => s.purpose,
+        (s) => s.credentials_location,
+        (s) => s.notes,
+      ])
+    : [];
 
   return (
     <SectionShell
@@ -74,21 +86,30 @@ export function SoftwareSection() {
         <SectionEmpty title="No software yet" cta="Add software" onAdd={() => setAdding(true)} />
       )}
       {list.data && list.data.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.data.map((s) => (
-            <EntryCard
-              key={s.id}
-              title={s.name}
-              meta={s.purpose || undefined}
-              fields={[
-                { label: 'Credentials', value: s.credentials_location },
-                { label: 'Notes', value: s.notes },
-              ]}
-              onEdit={() => setEditing(s)}
-              onDelete={() => setDeleting(s)}
-            />
-          ))}
-        </div>
+        <>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search software" />
+          {filtered.length === 0 ? (
+            <p className="text-sm text-neutral-500 py-8 text-center">
+              No software matches &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map((s) => (
+                <EntryCard
+                  key={s.id}
+                  title={s.name}
+                  meta={s.purpose || undefined}
+                  fields={[
+                    { label: 'Credentials', value: s.credentials_location },
+                    { label: 'Notes', value: s.notes },
+                  ]}
+                  onEdit={() => setEditing(s)}
+                  onDelete={() => setDeleting(s)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <SoftwareDialog

@@ -23,6 +23,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import { Logo } from '@/components/Logo';
 import { useCreateRolebook, useRolebook } from '@/hooks/useRolebook';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError } from '@/lib/api';
@@ -68,7 +69,8 @@ export function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6">
+      <Logo className="text-xl mb-6" />
       <Card className="w-full max-w-lg">
         <CardHeader>
           <h1 className="leading-none font-semibold">What's your role?</h1>

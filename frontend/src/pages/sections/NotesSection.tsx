@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/form';
 
 import { EntryCard } from '@/components/EntryCard';
+import { SearchInput } from '@/components/SearchInput';
 import {
   SectionEmpty,
   SectionError,
@@ -38,6 +39,7 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { searchFilter } from '@/lib/filter';
 import type { Note } from '@/lib/types';
 
 const schema = z.object({
@@ -57,6 +59,11 @@ export function NotesSection() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Note | null>(null);
   const [deleting, setDeleting] = useState<Note | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = list.data
+    ? searchFilter(list.data, query, [(n) => n.title, (n) => n.body])
+    : [];
 
   return (
     <SectionShell
@@ -71,17 +78,26 @@ export function NotesSection() {
         <SectionEmpty title="No notes yet" cta="Add note" onAdd={() => setAdding(true)} />
       )}
       {list.data && list.data.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-4">
-          {list.data.map((n) => (
-            <EntryCard
-              key={n.id}
-              title={n.title}
-              fields={[{ label: 'Body', value: n.body }]}
-              onEdit={() => setEditing(n)}
-              onDelete={() => setDeleting(n)}
-            />
-          ))}
-        </div>
+        <>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search notes" />
+          {filtered.length === 0 ? (
+            <p className="text-sm text-neutral-500 py-8 text-center">
+              No notes match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {filtered.map((n) => (
+                <EntryCard
+                  key={n.id}
+                  title={n.title}
+                  fields={[{ label: 'Body', value: n.body }]}
+                  onEdit={() => setEditing(n)}
+                  onDelete={() => setDeleting(n)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <NoteDialog

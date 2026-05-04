@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 
 import { EntryCard } from '@/components/EntryCard';
+import { SearchInput } from '@/components/SearchInput';
 import {
   SectionEmpty,
   SectionError,
@@ -45,6 +46,7 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { searchFilter } from '@/lib/filter';
 import type { Project, ProjectStatus } from '@/lib/types';
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
@@ -76,6 +78,16 @@ export function ProjectsSection() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState<Project | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = list.data
+    ? searchFilter(list.data, query, [
+        (p) => p.title,
+        (p) => statusLabel(p.status),
+        (p) => p.deadline,
+        (p) => p.notes,
+      ])
+    : [];
 
   return (
     <SectionShell
@@ -90,22 +102,31 @@ export function ProjectsSection() {
         <SectionEmpty title="No projects yet" cta="Add project" onAdd={() => setAdding(true)} />
       )}
       {list.data && list.data.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.data.map((p) => (
-            <EntryCard
-              key={p.id}
-              title={p.title}
-              meta={p.deadline ? `Due ${formatDate(p.deadline)}` : undefined}
-              badge={{
-                label: statusLabel(p.status),
-                tone: statusTone(p.status),
-              }}
-              fields={[{ label: 'Notes', value: p.notes }]}
-              onEdit={() => setEditing(p)}
-              onDelete={() => setDeleting(p)}
-            />
-          ))}
-        </div>
+        <>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search projects" />
+          {filtered.length === 0 ? (
+            <p className="text-sm text-neutral-500 py-8 text-center">
+              No projects match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map((p) => (
+                <EntryCard
+                  key={p.id}
+                  title={p.title}
+                  meta={p.deadline ? `Due ${formatDate(p.deadline)}` : undefined}
+                  badge={{
+                    label: statusLabel(p.status),
+                    tone: statusTone(p.status),
+                  }}
+                  fields={[{ label: 'Notes', value: p.notes }]}
+                  onEdit={() => setEditing(p)}
+                  onDelete={() => setDeleting(p)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <ProjectDialog

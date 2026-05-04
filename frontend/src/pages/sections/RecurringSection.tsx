@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 
 import { EntryCard } from '@/components/EntryCard';
+import { SearchInput } from '@/components/SearchInput';
 import {
   SectionEmpty,
   SectionError,
@@ -45,6 +46,7 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { searchFilter } from '@/lib/filter';
 import type { Cadence, RecurringTask } from '@/lib/types';
 
 const CADENCE_OPTIONS: { value: Cadence; label: string }[] = [
@@ -72,6 +74,15 @@ export function RecurringSection() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<RecurringTask | null>(null);
   const [deleting, setDeleting] = useState<RecurringTask | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = list.data
+    ? searchFilter(list.data, query, [
+        (t) => t.name,
+        (t) => cadenceLabel(t.cadence),
+        (t) => t.notes,
+      ])
+    : [];
 
   return (
     <SectionShell
@@ -90,18 +101,27 @@ export function RecurringSection() {
         />
       )}
       {list.data && list.data.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.data.map((t) => (
-            <EntryCard
-              key={t.id}
-              title={t.name}
-              badge={{ label: cadenceLabel(t.cadence), tone: 'blue' }}
-              fields={[{ label: 'Notes', value: t.notes }]}
-              onEdit={() => setEditing(t)}
-              onDelete={() => setDeleting(t)}
-            />
-          ))}
-        </div>
+        <>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search recurring tasks" />
+          {filtered.length === 0 ? (
+            <p className="text-sm text-neutral-500 py-8 text-center">
+              No tasks match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map((t) => (
+                <EntryCard
+                  key={t.id}
+                  title={t.name}
+                  badge={{ label: cadenceLabel(t.cadence), tone: 'blue' }}
+                  fields={[{ label: 'Notes', value: t.notes }]}
+                  onEdit={() => setEditing(t)}
+                  onDelete={() => setDeleting(t)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <RecurringDialog

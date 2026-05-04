@@ -21,6 +21,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import { Logo } from '@/components/Logo';
 import { useSignup } from '@/hooks/useAuth';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError } from '@/lib/api';
@@ -64,7 +65,8 @@ export function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6">
+      <Logo className="text-xl mb-6" />
       <Card className="w-full max-w-md">
         <CardHeader>
           <h1 className="leading-none font-semibold">Create your Rolebook account</h1>

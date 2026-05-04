@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/form';
 
 import { EntryCard } from '@/components/EntryCard';
+import { SearchInput } from '@/components/SearchInput';
 import {
   SectionEmpty,
   SectionError,
@@ -38,6 +39,7 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { searchFilter } from '@/lib/filter';
 import type { Contact } from '@/lib/types';
 
 const schema = z.object({
@@ -60,6 +62,17 @@ export function ContactsSection() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [deleting, setDeleting] = useState<Contact | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = list.data
+    ? searchFilter(list.data, query, [
+        (c) => c.name,
+        (c) => c.role,
+        (c) => c.relationship_notes,
+        (c) => c.communication_preferences,
+        (c) => c.watch_out_for,
+      ])
+    : [];
 
   return (
     <SectionShell
@@ -78,22 +91,31 @@ export function ContactsSection() {
         />
       )}
       {list.data && list.data.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.data.map((c) => (
-            <EntryCard
-              key={c.id}
-              title={c.name}
-              meta={c.role || undefined}
-              fields={[
-                { label: 'Communication', value: c.communication_preferences },
-                { label: 'Notes', value: c.relationship_notes },
-                { label: 'Watch out for', value: c.watch_out_for },
-              ]}
-              onEdit={() => setEditing(c)}
-              onDelete={() => setDeleting(c)}
-            />
-          ))}
-        </div>
+        <>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search contacts" />
+          {filtered.length === 0 ? (
+            <p className="text-sm text-neutral-500 py-8 text-center">
+              No contacts match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map((c) => (
+                <EntryCard
+                  key={c.id}
+                  title={c.name}
+                  meta={c.role || undefined}
+                  fields={[
+                    { label: 'Communication', value: c.communication_preferences },
+                    { label: 'Notes', value: c.relationship_notes },
+                    { label: 'Watch out for', value: c.watch_out_for },
+                  ]}
+                  onEdit={() => setEditing(c)}
+                  onDelete={() => setDeleting(c)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <ContactDialog

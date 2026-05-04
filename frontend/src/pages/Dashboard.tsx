@@ -1,9 +1,10 @@
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { BookMarked, LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ExportPdfButton } from '@/components/ExportPdfButton';
 import { SkipToContent } from '@/components/SkipToContent';
+import { Logo } from '@/components/Logo';
 import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook } from '@/hooks/useRolebook';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -57,15 +58,16 @@ export function Dashboard() {
       <header className="bg-white border-b border-neutral-200">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <BookMarked className="h-5 w-5 text-primary flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-neutral-900 leading-tight">Rolebook</p>
-              {rolebook.data && (
+            <Link to="/dashboard" className="flex-shrink-0">
+              <Logo className="text-lg" />
+            </Link>
+            {rolebook.data && (
+              <div className="hidden sm:block min-w-0 pl-3 border-l border-neutral-200">
                 <h1 className="text-sm text-neutral-700 leading-tight truncate">
                   {rolebook.data.role_title}
                 </h1>
-              )}
-            </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {me.data && (

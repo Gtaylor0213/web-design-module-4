@@ -24,7 +24,7 @@ Rolebook solves both by giving you a structured ongoing knowledge base that doub
 
 **Frontend:** React 19 + Vite, Tailwind CSS v4, shadcn/ui (Radix UI primitives), TanStack Query, Sonner, Lucide React
 
-**Backend:** Go 1.23 (`net/http` standard library, Go 1.22+ ServeMux path params), sqlc for type-safe queries, bcrypt for password hashing
+**Backend:** Go 1.22 (`net/http` standard library, Go 1.22+ ServeMux path params), sqlc for type-safe queries, bcrypt for password hashing, gofpdf for PDF export
 
 **Database:** MySQL 8.0
 
@@ -38,55 +38,81 @@ Rolebook solves both by giving you a structured ongoing knowledge base that doub
 /docs         Project documentation (proposal, architecture, schema)
 ```
 
-## Getting Started Locally
+## Live demo
+
+Production URL: **https://gracie-webdesign.me**
+
+Test account (full Rolebook with sample data already populated):
+
+```
+Email:    gracie@example.com
+Password: correct-horse-battery-staple
+```
+
+Once logged in, the dashboard shows the five sections. Try adding,
+editing, and deleting entries; downloading the PDF export from the
+toolbar; or visiting Settings to rename the role title.
+
+## Getting started locally
 
 ### Prerequisites
-- Go 1.21 or later
-- Node.js 18 or later
-- MySQL 8 or later
+- Go 1.22 or later
+- Node.js 22 or later
+- MySQL 8
 
 ### Setup
 
-1. Clone the repository:
-   ```
-   git clone <repository-url>
+1. **Clone and install:**
+   ```bash
+   git clone https://github.com/Gtaylor0213/web-design-module-4.git rolebook
    cd rolebook
    ```
 
-2. Set up the database:
+2. **Database:** create the `rolebook` database and load the schema:
+   ```bash
+   mysql -u root -p -e "CREATE DATABASE rolebook CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   mysql -u root -p rolebook < backend/schema.sql
    ```
-   mysql -u root -p < schema.sql
-   ```
-   (See `docs/database-schema.md` for the schema definition.)
 
-3. Start the backend:
+3. **Backend env vars:** the Go server reads connection info from
+   environment variables. Set them however you prefer (export, .env
+   file, systemd EnvironmentFile in production):
    ```
-   cd backend
-   go mod download
-   go run .
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USER=rolebook
+   DB_PASSWORD=...
+   DB_NAME=rolebook
    ```
-   The API will listen on port 8080.
 
-4. In another terminal, start the frontend:
+4. **Run the backend:**
+   ```bash
+   cd backend && go run .
+   # listens on :8080
    ```
-   cd frontend
-   npm install
-   npm run dev
+
+5. **Run the frontend:**
+   ```bash
+   cd frontend && npm install && npm run dev
    ```
-   The app will be available at the URL printed by Vite.
+   The Vite dev server proxies `/api` to the production server by
+   default (see `frontend/vite.config.ts`); change the `target` to
+   `http://localhost:8080` to hit your local backend.
 
 ## Documentation
 
 - [`docs/project-proposal.md`](docs/project-proposal.md) — what we're building, who it's for, and why
 - [`docs/architecture.md`](docs/architecture.md) — pages, user flow, and API design
 - [`docs/database-schema.md`](docs/database-schema.md) — database tables, columns, and relationships
+- [`docs/deployment-setup.md`](docs/deployment-setup.md) — server setup runbook
 - [`CLAUDE.md`](CLAUDE.md) — context file for AI coding assistants
 
-## Project Status
+## Project status
 
-This project is being built as the independent project for Modules 4-7 of the Web Design AI course.
+Built as the independent project for Modules 4–7 of the Web Design AI
+course. **All four modules complete.**
 
-- **Module 4 (current):** Project proposal, infrastructure setup, Hello World deployed
-- **Module 5:** Backend with database and API endpoints
-- **Module 6:** Frontend connected to backend
-- **Module 7:** Final polish, presentation
+- **Module 4** — Project proposal, documentation, infrastructure, deploy pipeline
+- **Module 5** — Go backend: 30 REST endpoints, MySQL, bcrypt auth, session middleware, PDF export
+- **Module 6** — React frontend: 8 pages, full CRUD UI for all five sections, PDF download, ownership transfer
+- **Module 7** — Polish: brand color, accessibility improvements (skip link, focus rings, heading hierarchy, per-route page titles), 404 page

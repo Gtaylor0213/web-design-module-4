@@ -14,16 +14,38 @@ For the full vision, scope, and feature list, see `docs/project-proposal.md`.
 
 ```
 /
-├── frontend/              React app (built in Module 6)
-├── backend/               Go API (built in Module 5)
+├── frontend/                       React 19 + Vite + TS app
+│   ├── src/
+│   │   ├── pages/                  Top-level routes
+│   │   │   └── sections/           One file per section CRUD UI
+│   │   ├── components/
+│   │   │   └── ui/                 shadcn/ui generated primitives
+│   │   ├── hooks/                  useAuth, useRolebook, usePageTitle
+│   │   └── lib/                    Typed fetch client, types, CRUD helpers
+│   ├── package.json
+│   └── vite.config.ts
+├── backend/                        Go REST API
+│   ├── main.go                     Wire-up, route mounting
+│   ├── schema.sql                  Source of truth for the DB schema
+│   ├── sqlc.yaml
+│   ├── db/
+│   │   ├── queries/                Hand-written SQL files
+│   │   └── generated/              sqlc-generated Go (committed)
+│   └── internal/
+│       ├── auth/                   Passwords, sessions, middleware
+│       ├── handlers/               One file per resource
+│       ├── server/                 JSON helpers
+│       └── pdf/                    gofpdf-based PDF generator
 ├── docs/
-│   ├── project-proposal.md      What we're building and why
-│   ├── architecture.md          Pages, navigation, API design
-│   └── database-schema.md       Tables, columns, relationships
+│   ├── project-proposal.md         What we're building and why
+│   ├── architecture.md             Pages, navigation, API design
+│   ├── database-schema.md          Tables, columns, relationships
+│   └── deployment-setup.md         Lightsail server runbook
 ├── .github/
-│   └── workflows/         GitHub Actions for automated deployment
-├── CLAUDE.md              This file
-└── README.md              Human-readable project overview
+│   └── workflows/deploy.yml        Build + rsync + restart on push to main
+├── issues.json                     Source for the original 30 GitHub issues
+├── CLAUDE.md                       This file
+└── README.md                       Human-readable project overview
 ```
 
 ## Tech Stack

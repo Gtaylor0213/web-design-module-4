@@ -177,8 +177,8 @@ After the workflow's first successful run:
 - [ ] **Backend health (local on server):** `curl http://127.0.0.1:8080/api/health` returns `{"status":"ok","service":"rolebook"}`.
 - [ ] **HTTP→HTTPS redirect:** `curl -sI http://gracie-webdesign.me/` returns `301 Moved Permanently` with `Location: https://gracie-webdesign.me/`.
 - [ ] **HTTPS health (through nginx):** `curl https://gracie-webdesign.me/api/health` returns the same JSON as the local check.
-- [ ] **HTTPS frontend (through nginx):** `curl -I https://gracie-webdesign.me/` returns `200 OK` and `Content-Type: text/html`.
-- [ ] **Frontend in a browser:** visiting `https://gracie-webdesign.me/` loads the Hello World page with the green "deployment pipeline working ✓" callout, and the browser shows a valid TLS lock.
+- [ ] **HTTPS frontend (through nginx):** `curl -I https://gracie-webdesign.me/` returns `200 OK` and `Content-Type: text/html`, and the served HTML references `/assets/index-*.js` and `/assets/index-*.css` (the Vite build output).
+- [ ] **Frontend in a browser:** visiting `https://gracie-webdesign.me/` loads the Rolebook landing page with a Log in button, the browser shows a valid TLS lock, and the page title reads "Rolebook · A personal knowledge base for your role".
 - [ ] **Logs are clean:** `journalctl -u rolebook-backend -n 50` shows the listening message and no errors.
 
 If any check fails, the failure log is the first place to look:
@@ -191,7 +191,15 @@ If any check fails, the failure log is the first place to look:
 
 ## 6. What changes per module
 
-- **Module 4 (now):** This setup, a static `index.html`, a Hello World Go server, and HTTPS via Let's Encrypt at `https://gracie-webdesign.me/`. Workflow deploys backend + frontend on every push to `main`.
-- **Module 5:** The MySQL groundwork is already done as part of Module 4 — MySQL 8.0 is installed, the `rolebook` database exists with all 7 tables (`backend/schema.sql` applied), the `rolebook` MySQL user has SELECT/INSERT/UPDATE/DELETE on `rolebook.*` (no DDL, by design), and credentials live in `/etc/rolebook/backend.env` (mode 0640, root:ubuntu). What's left for Module 5: write the Go data-access code (likely with sqlc), uncomment the `EnvironmentFile=/etc/rolebook/backend.env` line in the systemd unit, and `sudo systemctl daemon-reload && sudo systemctl restart rolebook-backend` so the Go process can read the credentials.
-- **Module 6:** Frontend becomes a Vite-built React app. Workflow needs an extra step before the frontend rsync: `cd frontend && npm ci && npm run build`, then rsync `frontend/dist/` (not `frontend/`) to the server.
-- **Module 7:** Final polish — could include moving rolebook to its own subdomain (e.g. `rolebook.gracie-webdesign.me`) by adding a DNS A-record and running `certbot --nginx -d rolebook.gracie-webdesign.me`, then updating `server_name` in the nginx config.
+All four course modules are complete. What was added at each step:
+
+- **Module 4** — Server setup, systemd unit, nginx site, sudoers entry, Let's Encrypt cert at `https://gracie-webdesign.me/`, GitHub Actions deploy workflow that rsyncs frontend + backend + restarts the service on every push to `main`.
+- **Module 5** — MySQL 8.0 database, `rolebook` user with DML-only privileges, all 8 tables loaded from `backend/schema.sql`, credentials in `/etc/rolebook/backend.env` (mode 0640, root:ubuntu), the systemd unit's `EnvironmentFile=` line uncommented so the Go process can read them.
+- **Module 6** — Workflow gained a Node 22 setup step and `npm ci && npm run build` before the frontend rsync; rsync source changed from `frontend/` to `frontend/dist/`. No server-side changes — nginx still serves `/var/www/rolebook/frontend/`, just now a Vite build output instead of a static page.
+- **Module 7** — Polish only; no infrastructure changes. The brand color, skip-to-content link, focus-ring rule, heading hierarchy fix, per-route page titles, and 404 page are all client-side.
+
+Future infrastructure changes that would be reasonable but aren't required:
+
+- Move Rolebook to its own subdomain (e.g. `rolebook.gracie-webdesign.me`) by adding a DNS A-record and running `certbot --nginx -d rolebook.gracie-webdesign.me`, then updating `server_name` in the nginx config.
+- Add a `journalctl`-based health check or external uptime monitor.
+- Set up automated database backups (mysqldump on a cron + S3 sync).

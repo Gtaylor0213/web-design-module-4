@@ -87,6 +87,7 @@ func main() {
 	mux.HandleFunc("GET /api/rolebook", requireAuth(rolebookHandler.Get))
 	mux.HandleFunc("POST /api/rolebook", requireAuth(rolebookHandler.Create))
 	mux.HandleFunc("PUT /api/rolebook", requireAuth(rolebookHandler.Update))
+	mux.HandleFunc("POST /api/rolebook/transfer", requireAuth(rolebookHandler.Transfer))
 
 	// contacts
 	mux.HandleFunc("GET /api/contacts", requireAuth(contactsHandler.List))

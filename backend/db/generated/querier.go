@@ -39,6 +39,7 @@ type Querier interface {
 	ListProjectsByRolebookAndStatus(ctx context.Context, arg ListProjectsByRolebookAndStatusParams) ([]Project, error)
 	ListRecurringTasksByRolebook(ctx context.Context, rolebookID int32) ([]RecurringTask, error)
 	ListSoftwareByRolebook(ctx context.Context, rolebookID int32) ([]Software, error)
+	TransferRolebookOwnership(ctx context.Context, arg TransferRolebookOwnershipParams) (sql.Result, error)
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (sql.Result, error)
 	UpdateNote(ctx context.Context, arg UpdateNoteParams) (sql.Result, error)
 	UpdateProject(ctx context.Context, arg UpdateProjectParams) (sql.Result, error)

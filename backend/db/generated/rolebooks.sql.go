@@ -44,6 +44,21 @@ func (q *Queries) GetRolebookByOwner(ctx context.Context, ownerID int32) (Rolebo
 	return i, err
 }
 
+const transferRolebookOwnership = `-- name: TransferRolebookOwnership :execresult
+UPDATE rolebooks
+SET owner_id = ?
+WHERE owner_id = ?
+`
+
+type TransferRolebookOwnershipParams struct {
+	NewOwnerID int32 `json:"new_owner_id"`
+	OldOwnerID int32 `json:"old_owner_id"`
+}
+
+func (q *Queries) TransferRolebookOwnership(ctx context.Context, arg TransferRolebookOwnershipParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, transferRolebookOwnership, arg.NewOwnerID, arg.OldOwnerID)
+}
+
 const updateRolebookByOwner = `-- name: UpdateRolebookByOwner :execresult
 UPDATE rolebooks
 SET role_title = ?

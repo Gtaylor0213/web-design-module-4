@@ -12,3 +12,8 @@ VALUES (?, ?);
 UPDATE rolebooks
 SET role_title = sqlc.arg(role_title)
 WHERE owner_id = sqlc.arg(owner_id);
+
+-- name: TransferRolebookOwnership :execresult
+UPDATE rolebooks
+SET owner_id = sqlc.arg(new_owner_id)
+WHERE owner_id = sqlc.arg(old_owner_id);

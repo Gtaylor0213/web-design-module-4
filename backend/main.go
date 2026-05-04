@@ -98,6 +98,7 @@ func main() {
 	mux.HandleFunc("GET /api/contacts", requireAuth(contactsHandler.List))
 	mux.HandleFunc("POST /api/contacts", requireAuth(contactsHandler.Create))
 	mux.HandleFunc("PUT /api/contacts/{id}", requireAuth(contactsHandler.Update))
+	mux.HandleFunc("PUT /api/contacts/{id}/favorite", requireAuth(contactsHandler.SetFavorite))
 	mux.HandleFunc("DELETE /api/contacts/{id}", requireAuth(contactsHandler.Delete))
 
 	// projects

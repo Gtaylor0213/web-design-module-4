@@ -30,6 +30,7 @@ export interface Contact {
   relationship_notes: string;
   communication_preferences: string;
   watch_out_for: string;
+  favorite: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -106,6 +106,7 @@ type Contact struct {
 	RelationshipNotes        sql.NullString `json:"relationship_notes"`
 	CommunicationPreferences sql.NullString `json:"communication_preferences"`
 	WatchOutFor              sql.NullString `json:"watch_out_for"`
+	Favorite                 bool           `json:"favorite"`
 	CreatedAt                time.Time      `json:"created_at"`
 	UpdatedAt                time.Time      `json:"updated_at"`
 }

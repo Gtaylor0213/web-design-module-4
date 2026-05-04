@@ -44,6 +44,7 @@ type Querier interface {
 	ListSoftwareByRolebook(ctx context.Context, rolebookID int32) ([]Software, error)
 	ListSubtasksByProject(ctx context.Context, projectID int32) ([]ProjectSubtask, error)
 	ListSubtasksForProjects(ctx context.Context, projectIds []int32) ([]ProjectSubtask, error)
+	SetContactFavorite(ctx context.Context, arg SetContactFavoriteParams) (sql.Result, error)
 	TransferRolebookOwnership(ctx context.Context, arg TransferRolebookOwnershipParams) (sql.Result, error)
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (sql.Result, error)
 	UpdateNote(ctx context.Context, arg UpdateNoteParams) (sql.Result, error)

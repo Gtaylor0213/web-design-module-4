@@ -10,18 +10,24 @@ interface EntryCardProps {
   fields: { label: string; value?: string | null }[];
   onEdit: () => void;
   onDelete: () => void;
+  /** Optional element rendered before the title in the header row. Used
+   *  by ContactsSection for the favorite-star toggle. */
+  leadingAction?: React.ReactNode;
 }
 
 /** Generic card layout shared by all five section types. Each section
  *  page maps its row-shape to this component's props. */
-export function EntryCard({ title, badge, meta, fields, onEdit, onDelete }: EntryCardProps) {
+export function EntryCard({ title, badge, meta, fields, onEdit, onDelete, leadingAction }: EntryCardProps) {
   const visible = fields.filter((f) => f.value && f.value.trim() !== '');
   return (
     <div className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-neutral-900 leading-tight break-words">{title}</h3>
-          {meta && <p className="text-xs text-neutral-500 mt-0.5">{meta}</p>}
+        <div className="min-w-0 flex-1 flex items-start gap-2">
+          {leadingAction}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-neutral-900 leading-tight break-words">{title}</h3>
+            {meta && <p className="text-xs text-neutral-500 mt-0.5">{meta}</p>}
+          </div>
         </div>
         {badge && <Badge tone={badge.tone}>{badge.label}</Badge>}
       </div>

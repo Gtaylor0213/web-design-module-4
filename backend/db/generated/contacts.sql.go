@@ -11,8 +11,8 @@ import (
 )
 
 const createContact = `-- name: CreateContact :execresult
-INSERT INTO contacts (rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO contacts (rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for, favorite)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateContactParams struct {
@@ -22,6 +22,7 @@ type CreateContactParams struct {
 	RelationshipNotes        sql.NullString `json:"relationship_notes"`
 	CommunicationPreferences sql.NullString `json:"communication_preferences"`
 	WatchOutFor              sql.NullString `json:"watch_out_for"`
+	Favorite                 bool           `json:"favorite"`
 }
 
 func (q *Queries) CreateContact(ctx context.Context, arg CreateContactParams) (sql.Result, error) {
@@ -32,6 +33,7 @@ func (q *Queries) CreateContact(ctx context.Context, arg CreateContactParams) (s
 		arg.RelationshipNotes,
 		arg.CommunicationPreferences,
 		arg.WatchOutFor,
+		arg.Favorite,
 	)
 }
 
@@ -50,7 +52,7 @@ func (q *Queries) DeleteContact(ctx context.Context, arg DeleteContactParams) (s
 }
 
 const getContactByIDAndRolebook = `-- name: GetContactByIDAndRolebook :one
-SELECT id, rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for, created_at, updated_at
+SELECT id, rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for, favorite, created_at, updated_at
 FROM contacts
 WHERE id = ? AND rolebook_id = ?
 LIMIT 1
@@ -72,6 +74,7 @@ func (q *Queries) GetContactByIDAndRolebook(ctx context.Context, arg GetContactB
 		&i.RelationshipNotes,
 		&i.CommunicationPreferences,
 		&i.WatchOutFor,
+		&i.Favorite,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -79,10 +82,10 @@ func (q *Queries) GetContactByIDAndRolebook(ctx context.Context, arg GetContactB
 }
 
 const listContactsByRolebook = `-- name: ListContactsByRolebook :many
-SELECT id, rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for, created_at, updated_at
+SELECT id, rolebook_id, name, role, relationship_notes, communication_preferences, watch_out_for, favorite, created_at, updated_at
 FROM contacts
 WHERE rolebook_id = ?
-ORDER BY id DESC
+ORDER BY favorite DESC, id DESC
 `
 
 func (q *Queries) ListContactsByRolebook(ctx context.Context, rolebookID int32) ([]Contact, error) {
@@ -102,6 +105,7 @@ func (q *Queries) ListContactsByRolebook(ctx context.Context, rolebookID int32) 
 			&i.RelationshipNotes,
 			&i.CommunicationPreferences,
 			&i.WatchOutFor,
+			&i.Favorite,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -118,9 +122,25 @@ func (q *Queries) ListContactsByRolebook(ctx context.Context, rolebookID int32) 
 	return items, nil
 }
 
+const setContactFavorite = `-- name: SetContactFavorite :execresult
+UPDATE contacts
+SET favorite = ?
+WHERE id = ? AND rolebook_id = ?
+`
+
+type SetContactFavoriteParams struct {
+	Favorite   bool  `json:"favorite"`
+	ID         int32 `json:"id"`
+	RolebookID int32 `json:"rolebook_id"`
+}
+
+func (q *Queries) SetContactFavorite(ctx context.Context, arg SetContactFavoriteParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, setContactFavorite, arg.Favorite, arg.ID, arg.RolebookID)
+}
+
 const updateContact = `-- name: UpdateContact :execresult
 UPDATE contacts
-SET name = ?, role = ?, relationship_notes = ?, communication_preferences = ?, watch_out_for = ?
+SET name = ?, role = ?, relationship_notes = ?, communication_preferences = ?, watch_out_for = ?, favorite = ?
 WHERE id = ? AND rolebook_id = ?
 `
 
@@ -130,6 +150,7 @@ type UpdateContactParams struct {
 	RelationshipNotes        sql.NullString `json:"relationship_notes"`
 	CommunicationPreferences sql.NullString `json:"communication_preferences"`
 	WatchOutFor              sql.NullString `json:"watch_out_for"`
+	Favorite                 bool           `json:"favorite"`
 	ID                       int32          `json:"id"`
 	RolebookID               int32          `json:"rolebook_id"`
 }
@@ -141,6 +162,7 @@ func (q *Queries) UpdateContact(ctx context.Context, arg UpdateContactParams) (s
 		arg.RelationshipNotes,
 		arg.CommunicationPreferences,
 		arg.WatchOutFor,
+		arg.Favorite,
 		arg.ID,
 		arg.RolebookID,
 	)

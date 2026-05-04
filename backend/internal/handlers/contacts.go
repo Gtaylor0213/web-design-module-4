@@ -20,6 +20,7 @@ type contactRequest struct {
 	RelationshipNotes        string `json:"relationship_notes"`
 	CommunicationPreferences string `json:"communication_preferences"`
 	WatchOutFor              string `json:"watch_out_for"`
+	Favorite                 bool   `json:"favorite"`
 }
 
 type contactResponse struct {
@@ -30,6 +31,7 @@ type contactResponse struct {
 	RelationshipNotes        string    `json:"relationship_notes"`
 	CommunicationPreferences string    `json:"communication_preferences"`
 	WatchOutFor              string    `json:"watch_out_for"`
+	Favorite                 bool      `json:"favorite"`
 	CreatedAt                time.Time `json:"created_at"`
 	UpdatedAt                time.Time `json:"updated_at"`
 }
@@ -43,6 +45,7 @@ func contactToResponse(c db.Contact) contactResponse {
 		RelationshipNotes:        server.FromNullable(c.RelationshipNotes),
 		CommunicationPreferences: server.FromNullable(c.CommunicationPreferences),
 		WatchOutFor:              server.FromNullable(c.WatchOutFor),
+		Favorite:                 c.Favorite,
 		CreatedAt:                c.CreatedAt,
 		UpdatedAt:                c.UpdatedAt,
 	}
@@ -87,6 +90,7 @@ func (h *ContactsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		RelationshipNotes:        server.Nullable(req.RelationshipNotes),
 		CommunicationPreferences: server.Nullable(req.CommunicationPreferences),
 		WatchOutFor:              server.Nullable(req.WatchOutFor),
+		Favorite:                 req.Favorite,
 	})
 	if err != nil {
 		server.WriteError(w, http.StatusInternalServerError, "internal", "failed to create contact")
@@ -131,9 +135,54 @@ func (h *ContactsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		RelationshipNotes:        server.Nullable(req.RelationshipNotes),
 		CommunicationPreferences: server.Nullable(req.CommunicationPreferences),
 		WatchOutFor:              server.Nullable(req.WatchOutFor),
+		Favorite:                 req.Favorite,
 	})
 	if err != nil {
 		server.WriteError(w, http.StatusInternalServerError, "internal", "failed to update contact")
+		return
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		server.WriteError(w, http.StatusNotFound, "not_found", "contact not found")
+		return
+	}
+	contact, err := h.Queries.GetContactByIDAndRolebook(r.Context(), db.GetContactByIDAndRolebookParams{
+		ID:         id,
+		RolebookID: rolebookID,
+	})
+	if err != nil {
+		server.WriteError(w, http.StatusInternalServerError, "internal", "contact updated but could not be fetched")
+		return
+	}
+	server.WriteJSON(w, http.StatusOK, contactToResponse(contact))
+}
+
+type favoriteRequest struct {
+	Favorite bool `json:"favorite"`
+}
+
+// SetFavorite is a small dedicated endpoint for one-click star toggles
+// that doesn't require sending the contact's full body.
+func (h *ContactsHandler) SetFavorite(w http.ResponseWriter, r *http.Request) {
+	rolebookID, ok := requireRolebookID(w, r, h.Queries)
+	if !ok {
+		return
+	}
+	id, ok := parseIDPath(w, r)
+	if !ok {
+		return
+	}
+	var req favoriteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		server.WriteError(w, http.StatusBadRequest, "invalid_json", "request body is not valid JSON")
+		return
+	}
+	res, err := h.Queries.SetContactFavorite(r.Context(), db.SetContactFavoriteParams{
+		Favorite:   req.Favorite,
+		ID:         id,
+		RolebookID: rolebookID,
+	})
+	if err != nil {
+		server.WriteError(w, http.StatusInternalServerError, "internal", "failed to update favorite")
 		return
 	}
 	if n, _ := res.RowsAffected(); n == 0 {

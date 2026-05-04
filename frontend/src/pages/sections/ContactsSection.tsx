@@ -24,6 +24,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
+import { Star } from 'lucide-react';
+
 import { EntryCard } from '@/components/EntryCard';
 import { SearchInput } from '@/components/SearchInput';
 import {
@@ -39,7 +41,9 @@ import {
   useEntities,
   useUpdateEntity,
 } from '@/lib/crud';
+import { useFavoriteContact } from '@/hooks/useFavoriteContact';
 import { searchFilter } from '@/lib/filter';
+import { cn } from '@/lib/utils';
 import type { Contact } from '@/lib/types';
 
 const schema = z.object({
@@ -57,6 +61,7 @@ export function ContactsSection() {
   const list = useEntities<Contact>(RESOURCE);
   const create = useCreateEntity<Contact, FormValues>(RESOURCE);
   const update = useUpdateEntity<Contact, FormValues>(RESOURCE);
+  const favorite = useFavoriteContact();
   const remove = useDeleteEntity(RESOURCE);
 
   const [adding, setAdding] = useState(false);
@@ -105,6 +110,24 @@ export function ContactsSection() {
                   key={c.id}
                   title={c.name}
                   meta={c.role || undefined}
+                  leadingAction={
+                    <button
+                      type="button"
+                      onClick={() => favorite.mutate({ id: c.id, favorite: !c.favorite })}
+                      className="mt-0.5 p-0.5 rounded hover:bg-neutral-100"
+                      aria-label={c.favorite ? `Unfavorite ${c.name}` : `Favorite ${c.name}`}
+                      aria-pressed={c.favorite}
+                    >
+                      <Star
+                        className={cn(
+                          'h-4 w-4',
+                          c.favorite
+                            ? 'fill-amber-400 text-amber-500'
+                            : 'text-neutral-300 hover:text-neutral-500',
+                        )}
+                      />
+                    </button>
+                  }
                   fields={[
                     { label: 'Communication', value: c.communication_preferences },
                     { label: 'Notes', value: c.relationship_notes },

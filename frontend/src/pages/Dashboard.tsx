@@ -2,6 +2,7 @@ import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { BookMarked, LogOut, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { ExportPdfButton } from '@/components/ExportPdfButton';
 import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook } from '@/hooks/useRolebook';
 
@@ -66,7 +67,8 @@ export function Dashboard() {
                 {me.data.name}
               </span>
             )}
-            <Button asChild variant="ghost" size="sm">
+            <ExportPdfButton />
+            <Button asChild variant="ghost" size="sm" title="Settings">
               <Link to="/settings">
                 <Settings className="h-4 w-4" />
                 <span className="sr-only">Settings</span>

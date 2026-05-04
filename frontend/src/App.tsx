@@ -6,6 +6,7 @@ import { Login } from '@/pages/Login';
 import { Onboarding } from '@/pages/Onboarding';
 import { Dashboard } from '@/pages/Dashboard';
 import { Settings } from '@/pages/Settings';
+import { Transfer } from '@/pages/Transfer';
 import { ProtectedRoute, RedirectIfAuthed } from '@/components/ProtectedRoute';
 
 export function App() {
@@ -47,6 +48,7 @@ export function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:section" element={<Dashboard />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/transfer" element={<Transfer />} />
       </Route>
 
       {/* Fallback — anything unrouted goes home */}

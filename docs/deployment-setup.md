@@ -102,13 +102,27 @@ sudo apt update
 sudo apt install -y nginx
 ```
 
-Create `/etc/nginx/sites-available/rolebook`:
+Create `/etc/nginx/sites-available/rolebook` with two server blocks: an HTTP block that 301-redirects everything to HTTPS, and an HTTPS block that serves the app:
 
 ```nginx
+# HTTP — redirect everything to HTTPS at the canonical domain
 server {
-    listen 80;
-    listen [::]:80;
-    server_name 3.133.79.69;   # replace with your domain when DNS is set up
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://gracie-webdesign.me$request_uri;
+}
+
+# HTTPS — serve rolebook
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name gracie-webdesign.me www.gracie-webdesign.me;
+
+    ssl_certificate     /etc/letsencrypt/live/gracie-webdesign.me/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/gracie-webdesign.me/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     root /var/www/rolebook/frontend;
     index index.html;
@@ -130,6 +144,8 @@ server {
     }
 }
 ```
+
+This setup reuses the Let's Encrypt cert already on the box (issued by Certbot for `gracie-webdesign.me` + `www.gracie-webdesign.me`). If you're starting from a brand-new server with no cert, run `sudo certbot --nginx -d gracie-webdesign.me -d www.gracie-webdesign.me` once first — Certbot will provision the cert and inject the `ssl_certificate` lines for you.
 
 Enable the site, disable the default, and reload nginx:
 
@@ -159,9 +175,10 @@ After the workflow's first successful run:
 - [ ] **GitHub Actions:** "Deploy to Lightsail" run is green end to end.
 - [ ] **systemd:** `sudo systemctl status rolebook-backend` shows `active (running)` and the most recent restart timestamp matches the deploy time.
 - [ ] **Backend health (local on server):** `curl http://127.0.0.1:8080/api/health` returns `{"status":"ok","service":"rolebook"}`.
-- [ ] **Backend health (through nginx):** `curl http://3.133.79.69/api/health` returns the same JSON.
-- [ ] **Frontend (through nginx):** `curl -I http://3.133.79.69/` returns `200 OK` and `Content-Type: text/html`.
-- [ ] **Frontend in a browser:** visiting `http://3.133.79.69/` loads the Hello World page with the green "deployment pipeline working ✓" callout.
+- [ ] **HTTP→HTTPS redirect:** `curl -sI http://gracie-webdesign.me/` returns `301 Moved Permanently` with `Location: https://gracie-webdesign.me/`.
+- [ ] **HTTPS health (through nginx):** `curl https://gracie-webdesign.me/api/health` returns the same JSON as the local check.
+- [ ] **HTTPS frontend (through nginx):** `curl -I https://gracie-webdesign.me/` returns `200 OK` and `Content-Type: text/html`.
+- [ ] **Frontend in a browser:** visiting `https://gracie-webdesign.me/` loads the Hello World page with the green "deployment pipeline working ✓" callout, and the browser shows a valid TLS lock.
 - [ ] **Logs are clean:** `journalctl -u rolebook-backend -n 50` shows the listening message and no errors.
 
 If any check fails, the failure log is the first place to look:
@@ -174,7 +191,7 @@ If any check fails, the failure log is the first place to look:
 
 ## 6. What changes per module
 
-- **Module 4 (now):** This setup, plus a static `index.html` and a Hello World Go server. Workflow deploys both on every push to `main`.
-- **Module 5:** Backend gains MySQL config — install MySQL on the server, create the database, store credentials in `/etc/rolebook/backend.env`, and uncomment the `EnvironmentFile=` line in the systemd unit.
+- **Module 4 (now):** This setup, a static `index.html`, a Hello World Go server, and HTTPS via Let's Encrypt at `https://gracie-webdesign.me/`. Workflow deploys backend + frontend on every push to `main`.
+- **Module 5:** Backend gains MySQL config — MySQL 8.0 is already installed on the server. Create a `rolebook` database, store credentials in `/etc/rolebook/backend.env` (chmod 600, owned by root:ubuntu), and uncomment the `EnvironmentFile=` line in the systemd unit. Run `sqlc generate` locally and commit the generated Go code.
 - **Module 6:** Frontend becomes a Vite-built React app. Workflow needs an extra step before the frontend rsync: `cd frontend && npm ci && npm run build`, then rsync `frontend/dist/` (not `frontend/`) to the server.
-- **Module 7:** Add a domain + Let's Encrypt with `certbot --nginx`, update `server_name` in the nginx config, and add the HTTPS server block (certbot can do this automatically).
+- **Module 7:** Final polish — could include moving rolebook to its own subdomain (e.g. `rolebook.gracie-webdesign.me`) by adding a DNS A-record and running `certbot --nginx -d rolebook.gracie-webdesign.me`, then updating `server_name` in the nginx config.

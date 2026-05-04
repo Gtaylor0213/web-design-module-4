@@ -7,6 +7,7 @@ import { Onboarding } from '@/pages/Onboarding';
 import { Dashboard } from '@/pages/Dashboard';
 import { Settings } from '@/pages/Settings';
 import { Transfer } from '@/pages/Transfer';
+import { NotFound } from '@/pages/NotFound';
 import { ProtectedRoute, RedirectIfAuthed } from '@/components/ProtectedRoute';
 
 export function App() {
@@ -51,8 +52,8 @@ export function App() {
         <Route path="/settings/transfer" element={<Transfer />} />
       </Route>
 
-      {/* Fallback — anything unrouted goes home */}
-      <Route path="*" element={<Landing />} />
+      {/* 404 for anything unrouted */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -26,6 +26,7 @@ import {
 import { ExportPdfButton } from '@/components/ExportPdfButton';
 import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook, useUpdateRolebook } from '@/hooks/useRolebook';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 const schema = z.object({
   role_title: z.string().trim().min(1, 'Role title is required'),
@@ -33,6 +34,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function Settings() {
+  usePageTitle('Settings · Rolebook');
   const me = useMe();
   const rolebook = useRolebook();
   const update = useUpdateRolebook();

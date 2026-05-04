@@ -20,9 +20,9 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { useLogin } from '@/hooks/useAuth';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError } from '@/lib/api';
 
 const schema = z.object({
@@ -37,6 +37,7 @@ interface LocationState {
 }
 
 export function Login() {
+  usePageTitle('Log in · Rolebook');
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as LocationState | null)?.from;
@@ -71,10 +72,10 @@ export function Login() {
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Log in to Rolebook</CardTitle>
+          <h1 className="leading-none font-semibold">Log in to Rolebook</h1>
           <CardDescription>
             Don't have an account?{' '}
-            <Link to="/signup" className="text-neutral-900 underline-offset-4 hover:underline">
+            <Link to="/signup" className="text-primary underline-offset-4 hover:underline">
               Sign up
             </Link>
             .

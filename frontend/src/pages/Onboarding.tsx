@@ -22,9 +22,9 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { useCreateRolebook, useRolebook } from '@/hooks/useRolebook';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError } from '@/lib/api';
 
 const schema = z.object({
@@ -34,6 +34,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function Onboarding() {
+  usePageTitle('Get started · Rolebook');
   const navigate = useNavigate();
   const rolebook = useRolebook();
   const createRolebook = useCreateRolebook();
@@ -70,7 +71,7 @@ export function Onboarding() {
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>What's your role?</CardTitle>
+          <h1 className="leading-none font-semibold">What's your role?</h1>
           <CardDescription>
             Give your Rolebook a title that names the role you're keeping notes for. It can be
             specific (&quot;Graduate Assistant – E-Commerce Design Lab&quot;) or broad

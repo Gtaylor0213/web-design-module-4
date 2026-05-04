@@ -15,7 +15,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Form,
@@ -34,6 +33,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useTransferRolebook } from '@/hooks/useRolebook';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError, clearToken } from '@/lib/api';
 
 const schema = z.object({
@@ -42,6 +42,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function Transfer() {
+  usePageTitle('Transfer ownership · Rolebook');
   const navigate = useNavigate();
   const qc = useQueryClient();
   const transfer = useTransferRolebook();
@@ -99,7 +100,7 @@ export function Transfer() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Transfer your Rolebook</CardTitle>
+            <h1 className="leading-none font-semibold">Transfer your Rolebook</h1>
             <CardDescription>
               Hand your Rolebook off to another registered user.
             </CardDescription>

@@ -17,9 +17,11 @@ export function SectionShell({ title, count, onAdd, addLabel, children }: Sectio
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+          {/* h2 because the dashboard's role title is the page-level h1.
+           *  Each section is a subsection of that page. */}
+          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">
             {title}
-          </h1>
+          </h2>
           {typeof count === 'number' && (
             <p className="text-sm text-neutral-500">
               {count} {count === 1 ? 'entry' : 'entries'}

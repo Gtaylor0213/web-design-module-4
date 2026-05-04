@@ -20,9 +20,9 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { useSignup } from '@/hooks/useAuth';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ApiError } from '@/lib/api';
 
 const schema = z.object({
@@ -36,6 +36,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function Signup() {
+  usePageTitle('Sign up · Rolebook');
   const navigate = useNavigate();
   const signup = useSignup();
 
@@ -66,10 +67,10 @@ export function Signup() {
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create your Rolebook account</CardTitle>
+          <h1 className="leading-none font-semibold">Create your Rolebook account</h1>
           <CardDescription>
             Already have an account?{' '}
-            <Link to="/login" className="text-neutral-900 underline-offset-4 hover:underline">
+            <Link to="/login" className="text-primary underline-offset-4 hover:underline">
               Log in
             </Link>
             .

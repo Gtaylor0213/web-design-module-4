@@ -3,8 +3,10 @@ import { BookMarked, LogOut, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ExportPdfButton } from '@/components/ExportPdfButton';
+import { SkipToContent } from '@/components/SkipToContent';
 import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook } from '@/hooks/useRolebook';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 import { ContactsSection } from '@/pages/sections/ContactsSection';
 import { ProjectsSection } from '@/pages/sections/ProjectsSection';
@@ -35,29 +37,33 @@ export function Dashboard() {
   const rolebook = useRolebook();
   const logout = useLogout();
 
+  const activeSlug = params.section ?? 'contacts';
+  const sectionLabel = SECTIONS.find((s) => s.slug === activeSlug)?.label ?? 'Dashboard';
+  const titleSuffix = rolebook.data?.role_title ?? 'Rolebook';
+  usePageTitle(`${sectionLabel} · ${titleSuffix}`);
+
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
     return <Navigate to="/dashboard/contacts" replace />;
   }
 
-  const activeSlug = params.section ?? 'contacts';
   const SectionComponent = SECTION_COMPONENTS[activeSlug];
-
   if (!SectionComponent) {
     return <Navigate to="/dashboard/contacts" replace />;
   }
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SkipToContent />
       <header className="bg-white border-b border-neutral-200">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BookMarked className="h-5 w-5 text-neutral-700" />
-            <div>
+          <div className="flex items-center gap-3 min-w-0">
+            <BookMarked className="h-5 w-5 text-primary flex-shrink-0" />
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-neutral-900 leading-tight">Rolebook</p>
               {rolebook.data && (
-                <p className="text-xs text-neutral-600 leading-tight">
+                <h1 className="text-sm text-neutral-700 leading-tight truncate">
                   {rolebook.data.role_title}
-                </p>
+                </h1>
               )}
             </div>
           </div>
@@ -97,9 +103,10 @@ export function Dashboard() {
                   className={
                     'px-4 py-2 text-sm font-medium border-b-2 transition-colors ' +
                     (active
-                      ? 'border-neutral-900 text-neutral-900'
+                      ? 'border-primary text-primary'
                       : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300')
                   }
+                  aria-current={active ? 'page' : undefined}
                 >
                   {s.label}
                 </Link>
@@ -109,7 +116,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-8">
         <SectionComponent />
       </main>
     </div>

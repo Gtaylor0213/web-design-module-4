@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookMarked } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export function Landing() {
+  usePageTitle('Rolebook · A personal knowledge base for your role');
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       <div className="max-w-3xl mx-auto px-6 py-16 sm:py-24">
-        <div className="flex items-center gap-2 text-neutral-700 mb-6">
-          <BookMarked className="h-5 w-5" />
-          <span className="font-semibold tracking-tight">Rolebook</span>
+        <div className="flex items-center gap-2 mb-6">
+          <BookMarked className="h-5 w-5 text-primary" />
+          <span className="font-semibold tracking-tight text-neutral-900">Rolebook</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-neutral-900 mb-4">

@@ -1,6 +1,8 @@
 # Database Schema: Rolebook
 
-This document describes the database structure for Rolebook. The database is MySQL. For API endpoints that read and write this data, see `architecture.md`.
+This document describes the database structure for Rolebook **and the rationale behind each design decision**. The executable schema — actual `CREATE TABLE` statements you load into MySQL — lives in [`../backend/schema.sql`](../backend/schema.sql). If the two ever diverge, `schema.sql` is the source of truth.
+
+The database is MySQL 8. For API endpoints that read and write this data, see `architecture.md`.
 
 ## Overview
 

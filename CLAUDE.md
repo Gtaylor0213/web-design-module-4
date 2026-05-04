@@ -76,15 +76,16 @@ These decisions are made and should not be revisited without explicit discussion
 ### Running locally
 - Backend: `cd backend && go run .` (port 8080)
 - Frontend: `cd frontend && npm run dev` (Vite default port)
-- Database: MySQL running locally on default port, with the schema from `docs/database-schema.md` loaded
+- Database: MySQL on the default port. Apply the schema with `mysql rolebook < backend/schema.sql`. The design rationale lives in `docs/database-schema.md`; `backend/schema.sql` is the executable source of truth.
 
 ### Adding a new section field
-1. Update the table definition in `docs/database-schema.md`
-2. Write a migration (or update the schema file if not using migrations yet)
-3. Update the Go struct in `backend/`
-4. Update the request/response DTOs and validation
-5. Update the React form component for the section
-6. Update the entry card display
+1. Update the column in `backend/schema.sql` (the executable schema)
+2. Update the matching table description in `docs/database-schema.md` so the design doc stays in sync
+3. Write a migration (or, for early MVP, drop and re-create the affected table from the updated `schema.sql`)
+4. Update the Go struct in `backend/`
+5. Update the request/response DTOs and validation
+6. Update the React form component for the section
+7. Update the entry card display
 
 ### Implementing a new endpoint
 1. Confirm it's documented in `docs/architecture.md` — if not, update there first

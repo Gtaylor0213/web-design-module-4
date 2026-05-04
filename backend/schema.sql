@@ -126,3 +126,21 @@ CREATE TABLE notes (
     CONSTRAINT fk_notes_rolebook
         FOREIGN KEY (rolebook_id) REFERENCES rolebooks(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------------------
+-- sessions : auth tokens issued at signup/login, looked up per-request
+-- by the auth middleware. Opaque random tokens (no JWT). Logout deletes
+-- the row; deleting a user cascades to their sessions.
+-- ----------------------------------------------------------------------
+CREATE TABLE sessions (
+    id         INT          NOT NULL AUTO_INCREMENT,
+    user_id    INT          NOT NULL,
+    token      CHAR(64)     NOT NULL,  -- 32 random bytes, hex-encoded
+    expires_at TIMESTAMP    NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uniq_sessions_token (token),
+    KEY idx_sessions_user (user_id),
+    CONSTRAINT fk_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -6,10 +6,12 @@ The database is MySQL 8. For API endpoints that read and write this data, see `a
 
 ## Overview
 
-Seven tables, organized as one container per user (`rolebooks`) with five section tables hanging off each Rolebook:
+Eight tables: seven entity tables (organized as one Rolebook container per user, with five section tables hanging off each Rolebook), plus a `sessions` table for auth tokens.
 
 ```
 users (auth and identity)
+  │
+  ├─► sessions (auth tokens issued at signup/login)
   │
   └─► rolebooks (one per user, owned by users.id)
         │
@@ -120,6 +122,18 @@ Freeform knowledge entries. One row per note.
 | `body` | TEXT | NOT NULL | The freeform content |
 | `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | |
 | `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | |
+
+### sessions
+
+Auth tokens issued at signup/login. The middleware looks up an incoming `Authorization: Bearer <token>` against this table; no JWT, no signing — just opaque random tokens validated by row presence and `expires_at`.
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | |
+| `user_id` | INT | NOT NULL, FOREIGN KEY → users.id, ON DELETE CASCADE | Logging out the user (or deleting their account) drops their sessions automatically |
+| `token` | CHAR(64) | UNIQUE, NOT NULL | 32 random bytes, hex-encoded — 256 bits of entropy |
+| `expires_at` | TIMESTAMP | NOT NULL | Auth middleware rejects tokens past this time |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | |
 
 ## Relationships
 

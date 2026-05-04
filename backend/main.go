@@ -30,6 +30,8 @@ func openDB() *sql.DB {
 	if port == "" {
 		port = "3306"
 	}
+	// go-sql-driver/mysql scans TINYINT(1) into Go bool natively — no flag
+	// needed. parseTime is required for time.Time scanning.
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC",
 		mustEnv("DB_USER"),
 		mustEnv("DB_PASSWORD"),
@@ -69,6 +71,7 @@ func main() {
 	rolebookHandler := &handlers.RolebookHandler{Queries: queries}
 	contactsHandler := &handlers.ContactsHandler{Queries: queries}
 	projectsHandler := &handlers.ProjectsHandler{Queries: queries}
+	subtasksHandler := &handlers.SubtasksHandler{Queries: queries}
 	softwareHandler := &handlers.SoftwareHandler{Queries: queries}
 	recurringHandler := &handlers.RecurringTasksHandler{Queries: queries}
 	notesHandler := &handlers.NotesHandler{Queries: queries}
@@ -102,6 +105,11 @@ func main() {
 	mux.HandleFunc("POST /api/projects", requireAuth(projectsHandler.Create))
 	mux.HandleFunc("PUT /api/projects/{id}", requireAuth(projectsHandler.Update))
 	mux.HandleFunc("DELETE /api/projects/{id}", requireAuth(projectsHandler.Delete))
+
+	// project subtasks (nested under a project)
+	mux.HandleFunc("POST /api/projects/{id}/subtasks", requireAuth(subtasksHandler.Create))
+	mux.HandleFunc("PUT /api/projects/{id}/subtasks/{subtask_id}", requireAuth(subtasksHandler.Update))
+	mux.HandleFunc("DELETE /api/projects/{id}/subtasks/{subtask_id}", requireAuth(subtasksHandler.Delete))
 
 	// software
 	mux.HandleFunc("GET /api/software", requireAuth(softwareHandler.List))

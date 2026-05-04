@@ -17,6 +17,7 @@ type Querier interface {
 	CreateRolebook(ctx context.Context, arg CreateRolebookParams) (sql.Result, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (sql.Result, error)
 	CreateSoftware(ctx context.Context, arg CreateSoftwareParams) (sql.Result, error)
+	CreateSubtask(ctx context.Context, arg CreateSubtaskParams) (sql.Result, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error)
 	DeleteContact(ctx context.Context, arg DeleteContactParams) (sql.Result, error)
 	DeleteNote(ctx context.Context, arg DeleteNoteParams) (sql.Result, error)
@@ -24,6 +25,7 @@ type Querier interface {
 	DeleteRecurringTask(ctx context.Context, arg DeleteRecurringTaskParams) (sql.Result, error)
 	DeleteSessionByToken(ctx context.Context, token string) error
 	DeleteSoftware(ctx context.Context, arg DeleteSoftwareParams) (sql.Result, error)
+	DeleteSubtask(ctx context.Context, arg DeleteSubtaskParams) (sql.Result, error)
 	GetContactByIDAndRolebook(ctx context.Context, arg GetContactByIDAndRolebookParams) (Contact, error)
 	GetNoteByIDAndRolebook(ctx context.Context, arg GetNoteByIDAndRolebookParams) (Note, error)
 	GetProjectByIDAndRolebook(ctx context.Context, arg GetProjectByIDAndRolebookParams) (Project, error)
@@ -31,6 +33,7 @@ type Querier interface {
 	GetRolebookByOwner(ctx context.Context, ownerID int32) (Rolebook, error)
 	GetSessionByToken(ctx context.Context, token string) (Session, error)
 	GetSoftwareByIDAndRolebook(ctx context.Context, arg GetSoftwareByIDAndRolebookParams) (Software, error)
+	GetSubtaskByIDAndProject(ctx context.Context, arg GetSubtaskByIDAndProjectParams) (ProjectSubtask, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
 	ListContactsByRolebook(ctx context.Context, rolebookID int32) ([]Contact, error)
@@ -39,6 +42,8 @@ type Querier interface {
 	ListProjectsByRolebookAndStatus(ctx context.Context, arg ListProjectsByRolebookAndStatusParams) ([]Project, error)
 	ListRecurringTasksByRolebook(ctx context.Context, rolebookID int32) ([]RecurringTask, error)
 	ListSoftwareByRolebook(ctx context.Context, rolebookID int32) ([]Software, error)
+	ListSubtasksByProject(ctx context.Context, projectID int32) ([]ProjectSubtask, error)
+	ListSubtasksForProjects(ctx context.Context, projectIds []int32) ([]ProjectSubtask, error)
 	TransferRolebookOwnership(ctx context.Context, arg TransferRolebookOwnershipParams) (sql.Result, error)
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (sql.Result, error)
 	UpdateNote(ctx context.Context, arg UpdateNoteParams) (sql.Result, error)
@@ -46,6 +51,7 @@ type Querier interface {
 	UpdateRecurringTask(ctx context.Context, arg UpdateRecurringTaskParams) (sql.Result, error)
 	UpdateRolebookByOwner(ctx context.Context, arg UpdateRolebookByOwnerParams) (sql.Result, error)
 	UpdateSoftware(ctx context.Context, arg UpdateSoftwareParams) (sql.Result, error)
+	UpdateSubtask(ctx context.Context, arg UpdateSubtaskParams) (sql.Result, error)
 }
 
 var _ Querier = (*Queries)(nil)

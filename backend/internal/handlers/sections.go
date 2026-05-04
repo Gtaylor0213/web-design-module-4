@@ -44,3 +44,15 @@ func parseIDPath(w http.ResponseWriter, r *http.Request) (int32, bool) {
 	}
 	return int32(n), true
 }
+
+// parseSubtaskIDPath extracts the {subtask_id} path value for nested
+// /api/projects/{id}/subtasks/{subtask_id} routes.
+func parseSubtaskIDPath(w http.ResponseWriter, r *http.Request) (int32, bool) {
+	raw := r.PathValue("subtask_id")
+	n, err := strconv.ParseInt(raw, 10, 32)
+	if err != nil || n <= 0 {
+		server.WriteError(w, http.StatusBadRequest, "invalid_id", "subtask_id path parameter must be a positive integer")
+		return 0, false
+	}
+	return int32(n), true
+}

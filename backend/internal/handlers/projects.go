@@ -23,20 +23,25 @@ type projectRequest struct {
 }
 
 type projectResponse struct {
-	ID         int32     `json:"id"`
-	RolebookID int32     `json:"rolebook_id"`
-	Title      string    `json:"title"`
-	Status     string    `json:"status"`
-	Deadline   string    `json:"deadline"` // YYYY-MM-DD or ""
-	Notes      string    `json:"notes"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         int32             `json:"id"`
+	RolebookID int32             `json:"rolebook_id"`
+	Title      string            `json:"title"`
+	Status     string            `json:"status"`
+	Deadline   string            `json:"deadline"` // YYYY-MM-DD or ""
+	Notes      string            `json:"notes"`
+	CreatedAt  time.Time         `json:"created_at"`
+	UpdatedAt  time.Time         `json:"updated_at"`
+	Subtasks   []subtaskResponse `json:"subtasks"`
 }
 
-func projectToResponse(p db.Project) projectResponse {
+func projectToResponse(p db.Project, subtasks []db.ProjectSubtask) projectResponse {
 	deadline := ""
 	if p.Deadline.Valid {
 		deadline = p.Deadline.Time.Format("2006-01-02")
+	}
+	subs := make([]subtaskResponse, 0, len(subtasks))
+	for _, s := range subtasks {
+		subs = append(subs, subtaskToResponse(s))
 	}
 	return projectResponse{
 		ID:         p.ID,
@@ -47,6 +52,7 @@ func projectToResponse(p db.Project) projectResponse {
 		Notes:      server.FromNullable(p.Notes),
 		CreatedAt:  p.CreatedAt,
 		UpdatedAt:  p.UpdatedAt,
+		Subtasks:   subs,
 	}
 }
 
@@ -101,11 +107,41 @@ func (h *ProjectsHandler) List(w http.ResponseWriter, r *http.Request) {
 		server.WriteError(w, http.StatusInternalServerError, "internal", "failed to list projects")
 		return
 	}
+
+	// Fetch subtasks for all listed projects in one query, group by project_id.
+	byProject, err := h.fetchSubtasksFor(r, rows)
+	if err != nil {
+		server.WriteError(w, http.StatusInternalServerError, "internal", "failed to fetch subtasks")
+		return
+	}
+
 	out := make([]projectResponse, 0, len(rows))
 	for _, p := range rows {
-		out = append(out, projectToResponse(p))
+		out = append(out, projectToResponse(p, byProject[p.ID]))
 	}
 	server.WriteJSON(w, http.StatusOK, out)
+}
+
+// fetchSubtasksFor pulls every subtask whose project_id is in the given
+// projects slice and returns them grouped by project_id. Empty projects
+// list returns an empty map (no DB roundtrip).
+func (h *ProjectsHandler) fetchSubtasksFor(r *http.Request, projects []db.Project) (map[int32][]db.ProjectSubtask, error) {
+	out := make(map[int32][]db.ProjectSubtask, len(projects))
+	if len(projects) == 0 {
+		return out, nil
+	}
+	ids := make([]int32, len(projects))
+	for i, p := range projects {
+		ids[i] = p.ID
+	}
+	subtasks, err := h.Queries.ListSubtasksForProjects(r.Context(), ids)
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range subtasks {
+		out[s.ProjectID] = append(out[s.ProjectID], s)
+	}
+	return out, nil
 }
 
 func (h *ProjectsHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +192,8 @@ func (h *ProjectsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		server.WriteError(w, http.StatusInternalServerError, "internal", "project created but could not be fetched")
 		return
 	}
-	server.WriteJSON(w, http.StatusCreated, projectToResponse(project))
+	subtasks, _ := h.Queries.ListSubtasksByProject(r.Context(), project.ID)
+	server.WriteJSON(w, http.StatusCreated, projectToResponse(project, subtasks))
 }
 
 func (h *ProjectsHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +252,8 @@ func (h *ProjectsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		server.WriteError(w, http.StatusInternalServerError, "internal", "project updated but could not be fetched")
 		return
 	}
-	server.WriteJSON(w, http.StatusOK, projectToResponse(project))
+	subtasks, _ := h.Queries.ListSubtasksByProject(r.Context(), project.ID)
+	server.WriteJSON(w, http.StatusOK, projectToResponse(project, subtasks))
 }
 
 func (h *ProjectsHandler) Delete(w http.ResponseWriter, r *http.Request) {

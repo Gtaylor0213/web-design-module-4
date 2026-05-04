@@ -33,6 +33,7 @@ import {
 
 import { EntryCard } from '@/components/EntryCard';
 import { SearchInput } from '@/components/SearchInput';
+import { SubtaskEditor } from '@/components/SubtaskEditor';
 import {
   SectionEmpty,
   SectionError,
@@ -115,7 +116,7 @@ export function ProjectsSection() {
                 <EntryCard
                   key={p.id}
                   title={p.title}
-                  meta={p.deadline ? `Due ${formatDate(p.deadline)}` : undefined}
+                  meta={projectMeta(p)}
                   badge={{
                     label: statusLabel(p.status),
                     tone: statusTone(p.status),
@@ -165,6 +166,7 @@ export function ProjectsSection() {
             },
           );
         }}
+        editingProject={editing}
       />
       <DeleteDialog
         open={!!deleting}
@@ -237,6 +239,17 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Card meta line: deadline + subtask progress, separated by " · ". */
+function projectMeta(p: Project): string | undefined {
+  const parts: string[] = [];
+  if (p.deadline) parts.push(`Due ${formatDate(p.deadline)}`);
+  if (p.subtasks && p.subtasks.length > 0) {
+    const done = p.subtasks.filter((s) => s.completed).length;
+    parts.push(`${done} / ${p.subtasks.length} done`);
+  }
+  return parts.length ? parts.join(' · ') : undefined;
+}
+
 interface ProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -244,6 +257,10 @@ interface ProjectDialogProps {
   defaultValues: FormValues;
   submitting: boolean;
   onSubmit: (values: FormValues) => void;
+  /** When editing an existing project, pass it so the subtask editor can
+   *  show inside the dialog. The Add dialog skips it since there's no
+   *  project_id to attach subtasks to yet. */
+  editingProject?: Project | null;
 }
 
 function ProjectDialog({
@@ -253,6 +270,7 @@ function ProjectDialog({
   defaultValues,
   submitting,
   onSubmit,
+  editingProject,
 }: ProjectDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -334,6 +352,12 @@ function ProjectDialog({
                 </FormItem>
               )}
             />
+            {editingProject && (
+              <SubtaskEditor
+                projectId={editingProject.id}
+                subtasks={editingProject.subtasks ?? []}
+              />
+            )}
             <DialogFooter>
               <Button
                 type="button"

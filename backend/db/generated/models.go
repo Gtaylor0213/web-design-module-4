@@ -130,6 +130,15 @@ type Project struct {
 	UpdatedAt  time.Time      `json:"updated_at"`
 }
 
+type ProjectSubtask struct {
+	ID        int32     `json:"id"`
+	ProjectID int32     `json:"project_id"`
+	Title     string    `json:"title"`
+	Completed bool      `json:"completed"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type RecurringTask struct {
 	ID         int32                 `json:"id"`
 	RolebookID int32                 `json:"rolebook_id"`

@@ -36,6 +36,15 @@ export interface Contact {
 
 export type ProjectStatus = 'active' | 'on_hold' | 'done';
 
+export interface Subtask {
+  id: number;
+  project_id: number;
+  title: string;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Project {
   id: number;
   rolebook_id: number;
@@ -45,6 +54,7 @@ export interface Project {
   notes: string;
   created_at: string;
   updated_at: string;
+  subtasks: Subtask[];
 }
 
 export interface Software {

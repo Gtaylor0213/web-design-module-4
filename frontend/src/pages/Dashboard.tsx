@@ -9,6 +9,7 @@ import { useLogout, useMe } from '@/hooks/useAuth';
 import { useRolebook } from '@/hooks/useRolebook';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
+import { OverviewSection } from '@/pages/sections/OverviewSection';
 import { ContactsSection } from '@/pages/sections/ContactsSection';
 import { ProjectsSection } from '@/pages/sections/ProjectsSection';
 import { SoftwareSection } from '@/pages/sections/SoftwareSection';
@@ -16,6 +17,7 @@ import { RecurringSection } from '@/pages/sections/RecurringSection';
 import { NotesSection } from '@/pages/sections/NotesSection';
 
 const SECTIONS = [
+  { slug: 'overview', label: 'Overview' },
   { slug: 'contacts', label: 'Contacts' },
   { slug: 'projects', label: 'Projects' },
   { slug: 'software', label: 'Software' },
@@ -24,6 +26,7 @@ const SECTIONS = [
 ] as const;
 
 const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
+  overview: OverviewSection,
   contacts: ContactsSection,
   projects: ProjectsSection,
   software: SoftwareSection,
@@ -44,12 +47,12 @@ export function Dashboard() {
   usePageTitle(`${sectionLabel} · ${titleSuffix}`);
 
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
-    return <Navigate to="/dashboard/contacts" replace />;
+    return <Navigate to="/dashboard/overview" replace />;
   }
 
   const SectionComponent = SECTION_COMPONENTS[activeSlug];
   if (!SectionComponent) {
-    return <Navigate to="/dashboard/contacts" replace />;
+    return <Navigate to="/dashboard/overview" replace />;
   }
 
   return (

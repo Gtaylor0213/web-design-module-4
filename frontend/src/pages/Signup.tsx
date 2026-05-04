@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,6 +67,14 @@ export function Signup() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-md mb-3">
+        <Button asChild variant="ghost" size="sm" className="-ml-3">
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
+        </Button>
+      </div>
       <Logo className="text-xl mb-6" />
       <Card className="w-full max-w-md">
         <CardHeader>

@@ -13,19 +13,40 @@ interface EntryCardProps {
   /** Optional element rendered before the title in the header row. Used
    *  by ContactsSection for the favorite-star toggle. */
   leadingAction?: React.ReactNode;
+  /** Optional content rendered below the fields and above the action
+   *  buttons. Used by ProjectsSection to show subtasks inline. */
+  bottomContent?: React.ReactNode;
 }
 
 /** Generic card layout shared by all five section types. Each section
- *  page maps its row-shape to this component's props. */
-export function EntryCard({ title, badge, meta, fields, onEdit, onDelete, leadingAction }: EntryCardProps) {
+ *  page maps its row-shape to this component's props. The title is a
+ *  button that opens the edit dialog so the whole "click to view"
+ *  affordance is keyboard-accessible. */
+export function EntryCard({
+  title,
+  badge,
+  meta,
+  fields,
+  onEdit,
+  onDelete,
+  leadingAction,
+  bottomContent,
+}: EntryCardProps) {
   const visible = fields.filter((f) => f.value && f.value.trim() !== '');
   return (
-    <div className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+    <div className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm flex flex-col gap-3 hover:border-primary/40 transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1 flex items-start gap-2">
           {leadingAction}
           <div className="min-w-0 flex-1">
-            <h3 className="font-medium text-neutral-900 leading-tight break-words">{title}</h3>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="text-left w-full font-medium text-neutral-900 leading-tight break-words hover:text-primary focus-visible:outline-2 focus-visible:outline-ring rounded-sm"
+              title="View / edit"
+            >
+              {title}
+            </button>
             {meta && <p className="text-xs text-neutral-500 mt-0.5">{meta}</p>}
           </div>
         </div>
@@ -42,6 +63,8 @@ export function EntryCard({ title, badge, meta, fields, onEdit, onDelete, leadin
           ))}
         </dl>
       )}
+
+      {bottomContent}
 
       <div className="flex justify-end gap-1 -mb-1 mt-auto pt-1">
         <Button variant="ghost" size="sm" onClick={onEdit}>

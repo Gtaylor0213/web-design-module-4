@@ -34,6 +34,7 @@ import {
 import { EntryCard } from '@/components/EntryCard';
 import { SearchInput } from '@/components/SearchInput';
 import { SubtaskEditor } from '@/components/SubtaskEditor';
+import { ProjectCardSubtasks } from '@/components/ProjectCardSubtasks';
 import {
   SectionEmpty,
   SectionError,
@@ -77,7 +78,13 @@ export function ProjectsSection() {
   const remove = useDeleteEntity(RESOURCE);
 
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState<Project | null>(null);
+  // Track the editing project by id rather than holding a snapshot of the
+  // object. Deriving from the live list means subtask add / delete /
+  // toggle (which invalidate the projects query) propagate immediately
+  // into the open dialog.
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const editing =
+    editingId != null ? list.data?.find((p) => p.id === editingId) ?? null : null;
   const [deleting, setDeleting] = useState<Project | null>(null);
   const [query, setQuery] = useState('');
 
@@ -122,7 +129,8 @@ export function ProjectsSection() {
                     tone: statusTone(p.status),
                   }}
                   fields={[{ label: 'Notes', value: p.notes }]}
-                  onEdit={() => setEditing(p)}
+                  bottomContent={<ProjectCardSubtasks project={p} />}
+                  onEdit={() => setEditingId(p.id)}
                   onDelete={() => setDeleting(p)}
                 />
               ))}
@@ -149,7 +157,7 @@ export function ProjectsSection() {
       />
       <ProjectDialog
         open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
+        onOpenChange={(o) => !o && setEditingId(null)}
         title="Edit project"
         defaultValues={editing ? toFormValues(editing) : blank}
         submitting={update.isPending}
@@ -159,7 +167,7 @@ export function ProjectsSection() {
             { id: editing.id, body: values },
             {
               onSuccess: () => {
-                setEditing(null);
+                setEditingId(null);
                 toast.success('Project updated');
               },
               onError: (e) => toast.error(e.message),

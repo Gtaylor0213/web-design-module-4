@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import { api, clearToken, getToken, setToken } from '@/lib/api';
 import type { AuthResponse, User } from '@/lib/types';
@@ -55,6 +56,7 @@ export function useLogin() {
 
 export function useLogout() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   return useMutation<void, Error>({
     mutationFn: async () => {
       try {
@@ -63,7 +65,13 @@ export function useLogout() {
         clearToken();
       }
     },
-    onSuccess: () => {
+    // Run on both success and error so that even if the network call fails
+    // (we already cleared the token locally) the user still ends up on
+    // the landing page instead of the auth-required page they were on.
+    // Navigation runs first so the protected route unmounts before its
+    // own "no token -> /login" redirect can fire.
+    onSettled: () => {
+      navigate('/', { replace: true });
       qc.removeQueries({ queryKey: ME_KEY });
       qc.clear();
     },

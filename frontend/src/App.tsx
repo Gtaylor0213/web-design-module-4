@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
-import { Landing } from '@/pages/Landing';
+import { Home } from '@/pages/Home';
+import { About } from '@/pages/About';
 import { Signup } from '@/pages/Signup';
 import { Login } from '@/pages/Login';
 import { Onboarding } from '@/pages/Onboarding';
@@ -8,20 +9,21 @@ import { Dashboard } from '@/pages/Dashboard';
 import { Settings } from '@/pages/Settings';
 import { Transfer } from '@/pages/Transfer';
 import { NotFound } from '@/pages/NotFound';
+import { PublicLayout } from '@/components/PublicLayout';
 import { ProtectedRoute, RedirectIfAuthed } from '@/components/ProtectedRoute';
 
 export function App() {
   return (
     <Routes>
-      {/* Public, but bounce logged-in users to the dashboard */}
-      <Route
-        path="/"
-        element={
-          <RedirectIfAuthed>
-            <Landing />
-          </RedirectIfAuthed>
-        }
-      />
+      {/* Public marketing pages, always visible regardless of auth state.
+       *  PublicLayout shows different right-side nav buttons depending on
+       *  whether the visitor is logged in. */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Route>
+
+      {/* Auth pages — bounce logged-in users to the dashboard */}
       <Route
         path="/signup"
         element={

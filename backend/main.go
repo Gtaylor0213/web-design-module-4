@@ -72,6 +72,7 @@ func main() {
 	softwareHandler := &handlers.SoftwareHandler{Queries: queries}
 	recurringHandler := &handlers.RecurringTasksHandler{Queries: queries}
 	notesHandler := &handlers.NotesHandler{Queries: queries}
+	exportHandler := &handlers.ExportHandler{Queries: queries}
 	requireAuth := auth.RequireAuth(queries)
 
 	mux := http.NewServeMux()
@@ -88,6 +89,7 @@ func main() {
 	mux.HandleFunc("POST /api/rolebook", requireAuth(rolebookHandler.Create))
 	mux.HandleFunc("PUT /api/rolebook", requireAuth(rolebookHandler.Update))
 	mux.HandleFunc("POST /api/rolebook/transfer", requireAuth(rolebookHandler.Transfer))
+	mux.HandleFunc("GET /api/rolebook/export", requireAuth(exportHandler.PDF))
 
 	// contacts
 	mux.HandleFunc("GET /api/contacts", requireAuth(contactsHandler.List))

@@ -1,0 +1,213 @@
+[
+    {
+      "number": 1,
+      "title": "Set up MySQL database and users table",
+      "labels": ["backend", "infrastructure"],
+      "module": 5,
+      "body": "## Description\nCreate the MySQL database and the `users` table per `docs/database-schema.md`. This is the foundation for authentication.\n\n## Tasks\n- Create a `schema.sql` file in the repo root or `backend/migrations/`\n- Define the `users` table with columns: `id`, `email`, `password_hash`, `name`, `created_at`\n- Verify the schema loads cleanly into a fresh MySQL instance\n- Document the connection string format in `CLAUDE.md`\n\n## Acceptance Criteria\n- A SQL file exists in the repo that creates the `users` table\n- Running it against a fresh database succeeds\n- `email` is unique, `password_hash` and `name` are NOT NULL"
+    },
+    {
+      "number": 2,
+      "title": "Implement signup endpoint (POST /api/auth/signup)",
+      "labels": ["backend", "auth"],
+      "module": 5,
+      "body": "## Description\nCreate the signup endpoint that allows new users to register.\n\n## Tasks\n- Validate email format and password minimum length\n- Hash password with bcrypt before storing\n- Insert new user into `users` table\n- Return user info (without password) and an auth token\n- Reject duplicate emails with 409 Conflict\n\n## Acceptance Criteria\n- Can create a new account via curl/Postman\n- Second signup with same email returns 409\n- Password is stored as bcrypt hash, never plaintext"
+    },
+    {
+      "number": 3,
+      "title": "Implement login endpoint (POST /api/auth/login)",
+      "labels": ["backend", "auth"],
+      "module": 5,
+      "body": "## Description\nCreate the login endpoint that authenticates existing users.\n\n## Tasks\n- Look up user by email\n- Verify password hash with bcrypt\n- Return user info and an auth token on success\n- Return 401 on bad credentials (don't leak whether email exists)\n\n## Acceptance Criteria\n- Can log in with valid credentials and receive a token\n- Invalid password returns 401\n- Non-existent email returns 401 (same response as wrong password)"
+    },
+    {
+      "number": 4,
+      "title": "Implement auth middleware and GET /api/auth/me",
+      "labels": ["backend", "auth"],
+      "module": 5,
+      "body": "## Description\nCreate authentication middleware that validates tokens on protected routes, plus a `/me` endpoint for the frontend to verify session validity.\n\n## Tasks\n- Middleware extracts and validates the auth token\n- Attach authenticated user info to request context\n- `GET /api/auth/me` returns the current user\n- Reject requests without/with invalid tokens (401)\n\n## Acceptance Criteria\n- Hitting `/api/auth/me` without a token returns 401\n- With a valid token, returns the user's info\n- Middleware can be applied to other routes and works correctly"
+    },
+    {
+      "number": 5,
+      "title": "Implement logout endpoint (POST /api/auth/logout)",
+      "labels": ["backend", "auth"],
+      "module": 5,
+      "body": "## Description\nCreate the logout endpoint that invalidates the session.\n\n## Tasks\n- Invalidate the session/token (depends on auth strategy)\n- Return success response\n\n## Acceptance Criteria\n- After calling logout, the same token can no longer access protected endpoints\n- Returns 200 even if token is already invalid (idempotent)"
+    },
+    {
+      "number": 6,
+      "title": "Create section tables and rolebooks table",
+      "labels": ["backend", "infrastructure"],
+      "module": 5,
+      "body": "## Description\nCreate all six remaining tables per `docs/database-schema.md`: `rolebooks`, `contacts`, `projects`, `software`, `recurring_tasks`, `notes`.\n\n## Tasks\n- Add table definitions to `schema.sql`\n- Configure `ON DELETE CASCADE` foreign keys\n- ENUM values match the schema (project status, recurring task cadence)\n- All tables have `created_at` and `updated_at` timestamps\n\n## Acceptance Criteria\n- Running the SQL file against a fresh database creates all tables\n- Foreign keys are correctly configured\n- ENUMs accept only the documented values"
+    },
+    {
+      "number": 7,
+      "title": "Implement Rolebook endpoints (GET, POST, PUT /api/rolebook)",
+      "labels": ["backend"],
+      "module": 5,
+      "body": "## Description\nCreate the endpoints that manage the Rolebook container itself.\n\n## Tasks\n- `GET /api/rolebook` returns the user's Rolebook or 404\n- `POST /api/rolebook` creates a Rolebook for the user (rejects with 409 if one already exists)\n- `PUT /api/rolebook` updates the role title\n- All endpoints require authentication\n\n## Acceptance Criteria\n- Full lifecycle works via curl: GET returns 404, POST creates, GET returns the rolebook, PUT updates title\n- Second POST returns 409 (one rolebook per user)"
+    },
+    {
+      "number": 8,
+      "title": "Backend: Contacts CRUD",
+      "labels": ["backend", "section"],
+      "module": 5,
+      "body": "## Description\nImplement all four CRUD endpoints for the `contacts` section.\n\n## Tasks\n- `GET /api/contacts` lists all contacts in the user's Rolebook\n- `POST /api/contacts` creates a contact\n- `PUT /api/contacts/:id` updates a contact (verify ownership)\n- `DELETE /api/contacts/:id` deletes a contact (verify ownership)\n- All filtered by the authenticated user's Rolebook\n- Validate required fields\n\n## Acceptance Criteria\n- Full CRUD works via curl\n- Cannot access another user's contacts (returns 404)\n- Required fields are validated"
+    },
+    {
+      "number": 9,
+      "title": "Backend: Projects CRUD",
+      "labels": ["backend", "section"],
+      "module": 5,
+      "body": "## Description\nImplement all four CRUD endpoints for the `projects` section.\n\n## Tasks\n- `GET /api/projects` with optional `?status=` query param\n- `POST /api/projects` creates a project\n- `PUT /api/projects/:id` updates a project\n- `DELETE /api/projects/:id` deletes a project\n- Validate ENUM value for status\n\n## Acceptance Criteria\n- Full CRUD works via curl\n- Status filter works correctly\n- Invalid status values are rejected"
+    },
+    {
+      "number": 10,
+      "title": "Backend: Software CRUD",
+      "labels": ["backend", "section"],
+      "module": 5,
+      "body": "## Description\nImplement all four CRUD endpoints for the `software` section.\n\n## Tasks\n- `GET /api/software` lists all software entries\n- `POST /api/software` creates an entry\n- `PUT /api/software/:id` updates an entry\n- `DELETE /api/software/:id` deletes an entry\n\n## Acceptance Criteria\n- Full CRUD works via curl\n- Ownership scoping is enforced"
+    },
+    {
+      "number": 11,
+      "title": "Backend: Recurring Tasks CRUD",
+      "labels": ["backend", "section"],
+      "module": 5,
+      "body": "## Description\nImplement all four CRUD endpoints for the `recurring_tasks` section.\n\n## Tasks\n- `GET /api/recurring-tasks` lists all tasks\n- `POST /api/recurring-tasks` creates a task\n- `PUT /api/recurring-tasks/:id` updates a task\n- `DELETE /api/recurring-tasks/:id` deletes a task\n- Validate ENUM value for cadence\n\n## Acceptance Criteria\n- Full CRUD works via curl\n- Invalid cadence values are rejected"
+    },
+    {
+      "number": 12,
+      "title": "Backend: Notes CRUD",
+      "labels": ["backend", "section"],
+      "module": 5,
+      "body": "## Description\nImplement all four CRUD endpoints for the `notes` section.\n\n## Tasks\n- `GET /api/notes` lists all notes\n- `POST /api/notes` creates a note\n- `PUT /api/notes/:id` updates a note\n- `DELETE /api/notes/:id` deletes a note\n\n## Acceptance Criteria\n- Full CRUD works via curl\n- Ownership scoping is enforced"
+    },
+    {
+      "number": 13,
+      "title": "Implement transfer ownership endpoint (POST /api/rolebook/transfer)",
+      "labels": ["backend"],
+      "module": 5,
+      "body": "## Description\nCreate the endpoint that transfers Rolebook ownership to another user.\n\n## Tasks\n- Authenticated, only callable by the current owner\n- Look up target user by email\n- Return 404 with `{error: 'no_account'}` if email not registered\n- Update `rolebooks.owner_id` to new owner's ID\n- Return success message\n\n## Acceptance Criteria\n- Full transfer flow works via curl\n- Transfer to non-registered email returns 404 with the documented error format\n- After transfer, original owner can no longer access the Rolebook"
+    },
+    {
+      "number": 14,
+      "title": "Add gofpdf dependency and PDF generator scaffolding",
+      "labels": ["backend", "pdf"],
+      "module": 5,
+      "body": "## Description\nSet up the PDF generation library and create the scaffolding for the PDF generator.\n\n## Tasks\n- Add `gofpdf` (or equivalent) to `go.mod`\n- Create a `pdf` package with a `GeneratePDF(rolebook *Rolebook) ([]byte, error)` function stub\n- Verify it can produce a one-page Hello World PDF\n\n## Acceptance Criteria\n- A unit test or simple endpoint produces a valid PDF file\n- The PDF opens correctly in standard viewers\n\n## Note\nIf this issue takes more than 2 hours due to library issues, fall back to the browser-print approach (replace #14-16 with a single 'add print-friendly CSS' issue)."
+    },
+    {
+      "number": 15,
+      "title": "Implement PDF formatting for all five sections",
+      "labels": ["backend", "pdf"],
+      "module": 5,
+      "body": "## Description\nFlesh out the PDF generator to render a complete Rolebook with all sections.\n\n## Tasks\n- Header with role title and export date\n- One section block per section with heading and entry list\n- Reasonable typography (no fancy styling, but readable)\n- Empty sections are skipped or note 'No entries yet'\n\n## Acceptance Criteria\n- A Rolebook with entries in all sections renders cleanly to PDF\n- An empty Rolebook still produces a valid PDF\n- Long entries don't break layout"
+    },
+    {
+      "number": 16,
+      "title": "Implement PDF export endpoint (GET /api/rolebook/export)",
+      "labels": ["backend", "pdf"],
+      "module": 5,
+      "body": "## Description\nCreate the endpoint that exports the user's Rolebook as a PDF download.\n\n## Tasks\n- Authenticated, scoped to user's Rolebook\n- Reads all five section tables and the rolebook record\n- Calls the PDF generator\n- Returns `application/pdf` with `Content-Disposition: attachment` for download\n\n## Acceptance Criteria\n- Hitting the endpoint downloads a valid PDF in the browser\n- Filename is reasonable (e.g., `rolebook-{role-title}-{date}.pdf`)"
+    },
+    {
+      "number": 17,
+      "title": "Build Landing page UI",
+      "labels": ["frontend"],
+      "module": 6,
+      "body": "## Description\nBuild the public landing page at `/`.\n\n## Tasks\n- Brief explanation of what Rolebook is\n- Log In button (linking to `/login`)\n- Sign Up link (linking to `/signup`)\n- Logged-in users redirect to `/dashboard`\n\n## Acceptance Criteria\n- Unauthenticated visitors see the landing page\n- Authenticated users get redirected to dashboard"
+    },
+    {
+      "number": 18,
+      "title": "Build Sign Up page UI",
+      "labels": ["frontend", "auth"],
+      "module": 6,
+      "body": "## Description\nBuild the signup form at `/signup`.\n\n## Tasks\n- Form with email, password, name fields\n- Calls `/api/auth/signup`\n- Stores the returned token client-side\n- Redirects to `/onboarding` on success\n- Displays validation and server errors\n\n## Acceptance Criteria\n- End-to-end signup works in the browser\n- Errors are displayed inline (e.g., 'Email already registered')\n- After success, user lands on onboarding"
+    },
+    {
+      "number": 19,
+      "title": "Build Log In page UI",
+      "labels": ["frontend", "auth"],
+      "module": 6,
+      "body": "## Description\nBuild the login form at `/login`.\n\n## Tasks\n- Form with email and password fields\n- Calls `/api/auth/login`\n- Stores the returned token client-side\n- Redirects to `/dashboard` on success (or `/onboarding` if no Rolebook yet)\n- Displays errors\n\n## Acceptance Criteria\n- End-to-end login works in the browser\n- Invalid credentials show an inline error\n- New users without a Rolebook are routed to onboarding"
+    },
+    {
+      "number": 20,
+      "title": "Implement protected-route logic in the React app",
+      "labels": ["frontend", "auth"],
+      "module": 6,
+      "body": "## Description\nProtect routes that require authentication and verify token validity on app load.\n\n## Tasks\n- Routes under `/dashboard` and `/settings` require authentication\n- Unauthenticated users redirect to `/login`\n- On app load, hit `/api/auth/me` to verify token is still valid\n- If token invalid, clear it and redirect to login\n\n## Acceptance Criteria\n- Visiting a protected route while logged out redirects to `/login`\n- Visiting while logged in loads the page\n- Expired tokens are detected and the user is logged out gracefully"
+    },
+    {
+      "number": 21,
+      "title": "Build Onboarding page UI",
+      "labels": ["frontend"],
+      "module": 6,
+      "body": "## Description\nBuild the first-time setup page at `/onboarding`.\n\n## Tasks\n- Single form with role title field\n- Calls `POST /api/rolebook`\n- Redirects to `/dashboard/contacts` on success\n- Logged-in users with an existing Rolebook redirect to dashboard\n\n## Acceptance Criteria\n- New user sees onboarding once and never again\n- Invalid input (empty title) is rejected with inline error\n- After success, user lands on the dashboard"
+    },
+    {
+      "number": 22,
+      "title": "Build Dashboard shell with section tabs",
+      "labels": ["frontend", "dashboard"],
+      "module": 6,
+      "body": "## Description\nBuild the dashboard layout and tab navigation. This is the foundation for all section tabs.\n\n## Tasks\n- Layout with navigation header (logo, role title, settings menu)\n- Tab bar with Contacts | Projects | Software | Recurring | Notes\n- Routes `/dashboard/:section` render the active tab\n- `/dashboard` redirects to `/dashboard/contacts`\n- Empty state placeholder for each section (will be replaced by section UIs)\n\n## Acceptance Criteria\n- Can navigate between tabs, URL updates correctly\n- Header is stable across all tabs\n- Active tab is visually highlighted"
+    },
+    {
+      "number": 23,
+      "title": "Frontend: Contacts tab UI",
+      "labels": ["frontend", "section"],
+      "module": 6,
+      "body": "## Description\nBuild the Contacts tab content with full add/edit/delete UI.\n\n## Tasks\n- List view with entry cards showing name, role, communication preferences\n- 'Add Contact' button opens form modal\n- Edit and delete actions on each card\n- Form fields: name, role, relationship_notes, communication_preferences, watch_out_for\n- Empty state when no contacts exist\n\n## Acceptance Criteria\n- Can add, edit, delete contacts in the browser\n- Changes persist after page reload\n- Form validation matches backend (required fields)"
+    },
+    {
+      "number": 24,
+      "title": "Frontend: Projects tab UI",
+      "labels": ["frontend", "section"],
+      "module": 6,
+      "body": "## Description\nBuild the Projects tab content with full CRUD UI.\n\n## Tasks\n- List view with entry cards (showing status badge prominently)\n- Add/edit form with title, status dropdown, deadline date picker, notes\n- Empty state when no projects exist\n- Optional: filter by status\n\n## Acceptance Criteria\n- Can add, edit, delete projects in the browser\n- Status is visually distinct (active/on hold/done)\n- Date picker produces valid dates"
+    },
+    {
+      "number": 25,
+      "title": "Frontend: Software tab UI",
+      "labels": ["frontend", "section"],
+      "module": 6,
+      "body": "## Description\nBuild the Software tab content with full CRUD UI.\n\n## Tasks\n- List view with entry cards\n- Add/edit form with name, purpose, credentials_location, notes\n- Help text near `credentials_location` field reminding users to store the pointer, not the credential\n- Empty state when no software exists\n\n## Acceptance Criteria\n- Can add, edit, delete software entries in the browser\n- Help text about credentials is visible and clear"
+    },
+    {
+      "number": 26,
+      "title": "Frontend: Recurring Tasks tab UI",
+      "labels": ["frontend", "section"],
+      "module": 6,
+      "body": "## Description\nBuild the Recurring Tasks tab content with full CRUD UI.\n\n## Tasks\n- List view with entry cards (showing cadence badge)\n- Add/edit form with name, cadence dropdown, notes\n- Empty state when no recurring tasks exist\n\n## Acceptance Criteria\n- Can add, edit, delete recurring tasks in the browser\n- Cadence values match the four documented options"
+    },
+    {
+      "number": 27,
+      "title": "Frontend: Notes tab UI",
+      "labels": ["frontend", "section"],
+      "module": 6,
+      "body": "## Description\nBuild the Notes tab content with full CRUD UI.\n\n## Tasks\n- List view with entry cards (title prominent, body preview)\n- Add/edit form with title and body\n- Click a card to expand and see the full body\n- Empty state when no notes exist\n\n## Acceptance Criteria\n- Can add, edit, delete notes in the browser\n- Long notes are previewed cleanly without breaking the layout\n- Full body is accessible on click"
+    },
+    {
+      "number": 28,
+      "title": "Add PDF export button to Dashboard",
+      "labels": ["frontend", "pdf"],
+      "module": 6,
+      "body": "## Description\nWire up the PDF export feature in the UI.\n\n## Tasks\n- 'Export to PDF' button in the navigation header or settings menu\n- Triggers download via `GET /api/rolebook/export`\n- Show loading state during generation\n\n## Acceptance Criteria\n- Clicking the button downloads a PDF\n- Button is disabled or shows loading during the request"
+    },
+    {
+      "number": 29,
+      "title": "Build Settings page UI",
+      "labels": ["frontend"],
+      "module": 6,
+      "body": "## Description\nBuild the settings page at `/settings`.\n\n## Tasks\n- Display current role title (editable, calls `PUT /api/rolebook`)\n- Display user info (name, email)\n- Log out button\n- 'Transfer my Rolebook' button linking to `/settings/transfer`\n- (Optional) Change password section\n\n## Acceptance Criteria\n- Settings page renders with all the above\n- Role title edit works and persists"
+    },
+    {
+      "number": 30,
+      "title": "Build Transfer Ownership page UI",
+      "labels": ["frontend"],
+      "module": 6,
+      "body": "## Description\nBuild the transfer ownership flow at `/settings/transfer`.\n\n## Tasks\n- Clear warning that transfer is permanent\n- Email input field\n- 'Confirm transfer' button with secondary confirmation modal\n- Calls `POST /api/rolebook/transfer`\n- On success: log out and redirect to landing\n- On error (email not registered): show inline error\n\n## Acceptance Criteria\n- Full transfer flow works in the browser\n- Cannot accidentally transfer (requires explicit confirmation)\n- 'no_account' error displays a helpful message"
+    }
+  ]
+  

@@ -77,6 +77,7 @@ export function ContactsSection() {
   return (
     <SectionShell
       title="Contacts"
+      description="People you work with — colleagues, advisors, vendors, anyone you might need to reach out to. Capture how to talk to them and what to keep in mind."
       count={list.data?.length}
       onAdd={() => setAdding(true)}
       addLabel="Add contact"

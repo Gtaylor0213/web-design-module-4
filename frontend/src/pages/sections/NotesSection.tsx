@@ -68,6 +68,7 @@ export function NotesSection() {
   return (
     <SectionShell
       title="Notes"
+      description="Freeform knowledge entries — tribal know-how, learned tricks, anything that doesn't fit one of the other sections."
       count={list.data?.length}
       onAdd={() => setAdding(true)}
       addLabel="Add note"

@@ -92,6 +92,7 @@ export function ProjectsSection() {
   return (
     <SectionShell
       title="Projects"
+      description="Bounded work with a clear scope and a status (active, on hold, done). Add a deadline if there is one."
       count={list.data?.length}
       onAdd={() => setAdding(true)}
       addLabel="Add project"

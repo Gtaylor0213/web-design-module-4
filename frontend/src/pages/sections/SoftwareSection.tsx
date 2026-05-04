@@ -76,6 +76,7 @@ export function SoftwareSection() {
   return (
     <SectionShell
       title="Software & systems"
+      description="Tools and accounts used in this role. Save a pointer to where credentials live (e.g., a password manager entry) — never the credentials themselves."
       count={list.data?.length}
       onAdd={() => setAdding(true)}
       addLabel="Add software"

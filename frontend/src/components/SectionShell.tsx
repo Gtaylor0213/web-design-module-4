@@ -1,9 +1,12 @@
-import { Plus } from 'lucide-react';
+import { Info, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 interface SectionShellProps {
   title: string;
+  /** One-line "what is this for" description. Renders as a subtle info
+   *  card under the title row to orient new users. */
+  description?: string;
   count?: number;
   onAdd: () => void;
   addLabel: string;
@@ -12,10 +15,17 @@ interface SectionShellProps {
 
 /** Wraps a section's content with the page header (title + count + Add
  *  button) so the five section pages render consistently. */
-export function SectionShell({ title, count, onAdd, addLabel, children }: SectionShellProps) {
+export function SectionShell({
+  title,
+  description,
+  count,
+  onAdd,
+  addLabel,
+  children,
+}: SectionShellProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <div>
           {/* h2 because the dashboard's role title is the page-level h1.
            *  Each section is a subsection of that page. */}
@@ -33,6 +43,12 @@ export function SectionShell({ title, count, onAdd, addLabel, children }: Sectio
           {addLabel}
         </Button>
       </div>
+      {description && (
+        <div className="mb-6 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 flex items-start gap-2">
+          <Info className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" aria-hidden />
+          <p className="text-sm text-neutral-700 leading-snug">{description}</p>
+        </div>
+      )}
       {children}
     </div>
   );

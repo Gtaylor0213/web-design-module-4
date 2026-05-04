@@ -87,6 +87,7 @@ export function RecurringSection() {
   return (
     <SectionShell
       title="Recurring tasks"
+      description="Ongoing obligations with a cadence — weekly, monthly, semester, or ad-hoc. Use the notes to capture where files live or who to loop in."
       count={list.data?.length}
       onAdd={() => setAdding(true)}
       addLabel="Add recurring task"
